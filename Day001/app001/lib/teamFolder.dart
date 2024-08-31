@@ -19,8 +19,12 @@ class _TeamFolderPageState extends State<TeamFolderPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-           ElevatedButton(onPressed: (){ print("clicked")}, child: Text("Click me")),
-           SizedBox(height: 20),
+            ElevatedButton(
+                onPressed: () {
+                  print("clicked");
+                },
+                child: Text("Click me")),
+            SizedBox(height: 20),
             Text("Team Folder Page"),
             SizedBox(height: 20),
             ElevatedButton(
