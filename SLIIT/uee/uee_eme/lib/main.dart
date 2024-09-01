@@ -1,191 +1,277 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const MyApp());
-}
+void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      title: 'Medical Profile Form',
+      home: MedicalProfileForm(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
-
+class MedicalProfileForm extends StatefulWidget {
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  _MedicalProfileFormState createState() => _MedicalProfileFormState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MedicalProfileFormState extends State<MedicalProfileForm> {
+  final _formKey = GlobalKey<FormState>();
+
+  // Controllers to capture user input
+  final nameController = TextEditingController();
+  final ageController = TextEditingController();
+  final allergiesController = TextEditingController();
+  final emergencyContactController = TextEditingController();
+  final additionalNotesController = TextEditingController();
+
+  // Blood type selection
+  String? _selectedBloodType;
+
+  @override
+  void dispose() {
+    // Clean up controllers when the form is disposed
+    nameController.dispose();
+    ageController.dispose();
+    allergiesController.dispose();
+    emergencyContactController.dispose();
+    additionalNotesController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
+        title: Text('Medical Profile Form'),
       ),
-      body: const Padding(
-        padding: EdgeInsets.all(16.0),
-        child: EmailPasswordWidget(),
-      ),
-    );
-  }
-}
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Column(
+                children: [
+                  SizedBox(height: constraints.maxHeight * 0.08),
+                  Image.network(
+                    "https://i.postimg.cc/nz0YBQcH/Logo-light.png",
+                    height: 100,
+                  ),
+                  SizedBox(height: constraints.maxHeight * 0.08),
+                  Text(
+                    "Medical Profile",
+                    style: Theme.of(context)
+                        .textTheme
+                        .headlineSmall!
+                        .copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: constraints.maxHeight * 0.05),
+                  Form(
+                    key: _formKey,
+                    child: Column(
+                      children: [
+                        // Full Name
+                        TextFormField(
+                          controller: nameController,
+                          decoration: const InputDecoration(
+                            hintText: 'Full name',
+                            filled: true,
+                            fillColor: Color(0xFFF5FCF9),
+                            contentPadding: EdgeInsets.symmetric(
+                                horizontal: 24.0, vertical: 16.0),
+                            border: OutlineInputBorder(
+                              borderSide: BorderSide.none,
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(50)),
+                            ),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your full name';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 16.0),
 
-class EmailPasswordWidget extends StatefulWidget {
-  const EmailPasswordWidget({super.key});
+                        // Age
+                        TextFormField(
+                          controller: ageController,
+                          decoration: const InputDecoration(
+                            hintText: 'Age',
+                            filled: true,
+                            fillColor: Color(0xFFF5FCF9),
+                            contentPadding: EdgeInsets.symmetric(
+                                horizontal: 24.0, vertical: 16.0),
+                            border: OutlineInputBorder(
+                              borderSide: BorderSide.none,
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(50)),
+                            ),
+                          ),
+                          keyboardType: TextInputType.number,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your age';
+                            } else if (int.tryParse(value) == null ||
+                                int.parse(value) <= 0) {
+                              return 'Please enter a valid age';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 16.0),
 
-  @override
-  EmailPasswordWidgetState createState() => EmailPasswordWidgetState();
-}
+                        // Blood Type Dropdown
+                        DropdownButtonFormField<String>(
+                          value: _selectedBloodType,
+                          decoration: const InputDecoration(
+                            hintText: 'Blood Type',
+                            filled: true,
+                            fillColor: Color(0xFFF5FCF9),
+                            contentPadding: EdgeInsets.symmetric(
+                                horizontal: 24.0, vertical: 16.0),
+                            border: OutlineInputBorder(
+                              borderSide: BorderSide.none,
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(50)),
+                            ),
+                          ),
+                          items: [
+                            'A+',
+                            'A-',
+                            'B+',
+                            'B-',
+                            'AB+',
+                            'AB-',
+                            'O+',
+                            'O-'
+                          ].map((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(value),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedBloodType = value;
+                            });
+                          },
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please select your blood type';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 16.0),
 
-class EmailPasswordWidgetState extends State<EmailPasswordWidget> {
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
+                        // Allergies
+                        TextFormField(
+                          controller: allergiesController,
+                          decoration: const InputDecoration(
+                            hintText: 'Allergies',
+                            filled: true,
+                            fillColor: Color(0xFFF5FCF9),
+                            contentPadding: EdgeInsets.symmetric(
+                                horizontal: 24.0, vertical: 16.0),
+                            border: OutlineInputBorder(
+                              borderSide: BorderSide.none,
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(50)),
+                            ),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter any allergies';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 16.0),
 
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Form(
-        key: _formKey,
-        child: Column(
-          children: [
-            const SizedBox(height: 10),
-            CustomTextField(
-              controller: _emailController,
-              hintText: 'Email',
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter your email';
-                }
-                final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
-                if (!emailRegex.hasMatch(value)) {
-                  return 'Please enter a valid email';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 16.0),
-            CustomTextField(
-              controller: _passwordController,
-              hintText: 'Password',
-              obscureText: true,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter your password';
-                }
-                return null;
-              },
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: () {
-                    // Handle forgot password logic
-                  },
-                  child: const Text(
-                    'Forgot Password?',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
+                        // Emergency Contact
+                        TextFormField(
+                          controller: emergencyContactController,
+                          decoration: const InputDecoration(
+                            hintText: 'Emergency Contact Number',
+                            filled: true,
+                            fillColor: Color(0xFFF5FCF9),
+                            contentPadding: EdgeInsets.symmetric(
+                                horizontal: 24.0, vertical: 16.0),
+                            border: OutlineInputBorder(
+                              borderSide: BorderSide.none,
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(50)),
+                            ),
+                          ),
+                          keyboardType: TextInputType.phone,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter an emergency contact number';
+                            } else if (!RegExp(r'^\+?0[0-9]{9,13}$')
+                                .hasMatch(value)) {
+                              return 'Please enter a valid phone number';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 16.0),
+
+                        // Additional Notes
+                        TextFormField(
+                          controller: additionalNotesController,
+                          decoration: const InputDecoration(
+                            hintText: 'Additional Notes',
+                            filled: true,
+                            fillColor: Color(0xFFF5FCF9),
+                            contentPadding: EdgeInsets.symmetric(
+                                horizontal: 24.0, vertical: 16.0),
+                            border: OutlineInputBorder(
+                              borderSide: BorderSide.none,
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(50)),
+                            ),
+                          ),
+                          maxLines: 4,
+                          validator: (value) {
+                            return null; // Optional field, no validation needed
+                          },
+                        ),
+                        const SizedBox(height: 32.0),
+
+                        // Save Profile Button
+                        ElevatedButton(
+                          onPressed: () {
+                            if (_formKey.currentState!.validate()) {
+                              _formKey.currentState!.save();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                    content:
+                                        Text('Profile saved successfully!')),
+                              );
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            elevation: 0,
+                            backgroundColor: const Color(0xFF00BF6D),
+                            foregroundColor: Colors.white,
+                            minimumSize: const Size(double.infinity, 48),
+                            shape: const StadiumBorder(),
+                          ),
+                          child: const Text("Save Profile"),
+                        ),
+                      ],
                     ),
                   ),
-                ),
+                ],
               ),
-            ),
-            SizedBox(
-              height: 50,
-              width: double.infinity, // Full-width button
-              child: ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState?.validate() ?? false) {
-                    // Handle sign in logic
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.amber,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.0),
-                  ),
-                  padding: const EdgeInsets.symmetric(vertical: 14.0),
-                  shadowColor: Colors.black.withOpacity(0.3),
-                  elevation: 8,
-                ),
-                child: const Text(
-                  'Sign In',
-                  style: TextStyle(
-                    fontSize: 18.0,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
-          ],
+            );
+          },
         ),
-      ),
-    );
-  }
-}
-
-class CustomTextField extends StatelessWidget {
-  final TextEditingController controller;
-  final String hintText;
-  final bool obscureText;
-  final FormFieldValidator<String>? validator;
-
-  const CustomTextField({
-    required this.controller,
-    required this.hintText,
-    this.obscureText = false,
-    this.validator,
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return TextFormField(
-      cursorColor: Colors.black,
-      style: const TextStyle(color: Colors.black),
-      controller: controller,
-      obscureText: obscureText,
-      validator: validator,
-      decoration: InputDecoration(
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
-        hintText: hintText,
-        hintStyle: TextStyle(color: Colors.black.withOpacity(.8)),
-        focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.black.withOpacity(.8)),
-          borderRadius: BorderRadius.circular(8.0),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.grey.withOpacity(.8)),
-          borderRadius: BorderRadius.circular(8.0),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.red.withOpacity(.8)),
-          borderRadius: BorderRadius.circular(8.0),
-        ),
-        filled: true,
-        fillColor: Colors.white.withOpacity(0.8), // Glassmorphism effect
       ),
     );
   }
