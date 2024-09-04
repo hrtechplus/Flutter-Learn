@@ -30,9 +30,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  shared_preferences: ^2.0.13
   contacts_service: ^0.6.3
-  firebase_core: latest_version
-  cloud_firestore: latest_version
   permission_handler: ^10.0.0
 
   # The following adds the Cupertino Icons font to your application.
