@@ -87,7 +87,7 @@ class SosScreen extends StatelessWidget {
                   Row(
                     children: [
                       Text(
-                        "Hi, Anna Williams",
+                        "Hi, Hasindu Rangika",
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
@@ -184,7 +184,7 @@ class SosScreen extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          "#1 Holy Angel St, Angeles, 2009 Pampanga",
+                          "94/39 Gemunu Mawatha Minuwangoda",
                           style: TextStyle(
                             fontSize: 14,
                             color: Colors.black54,
