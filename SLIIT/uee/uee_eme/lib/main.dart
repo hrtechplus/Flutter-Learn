@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 
 void main() {
   runApp(MyApp());
@@ -22,7 +23,7 @@ class MainApp extends StatefulWidget {
 class _MainAppState extends State<MainApp> {
   int _selectedIndex = 0;
   final List<Widget> _screens = [
-    SosScreen(), // Home Screen (SOS Screen)
+    SosScreen(),
     HistoryScreen(),
     ChatScreen(),
     ProfileScreen(),
@@ -67,8 +68,62 @@ class _MainAppState extends State<MainApp> {
   }
 }
 
-// SOS Screen (Home Screen)
-class SosScreen extends StatelessWidget {
+class SosScreen extends StatefulWidget {
+  @override
+  _SosScreenState createState() => _SosScreenState();
+}
+
+class _SosScreenState extends State<SosScreen> {
+  String _currentLocation = "Fetching location...";
+
+  @override
+  void initState() {
+    super.initState();
+    _determinePosition();
+  }
+
+  Future<void> _determinePosition() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    // Test if location services are enabled.
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      // Location services are not enabled, don't continue
+      setState(() {
+        _currentLocation = "Location services are disabled.";
+      });
+      return;
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        // Permissions are denied, show a message
+        setState(() {
+          _currentLocation = "Location permissions are denied.";
+        });
+        return;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      // Permissions are permanently denied, show a message
+      setState(() {
+        _currentLocation = "Location permissions are permanently denied.";
+      });
+      return;
+    }
+
+    // When permissions are granted, get the current position
+    Position position = await Geolocator.getCurrentPosition();
+    setState(() {
+      _currentLocation =
+          "${position.latitude}, ${position.longitude}"; // Display latitude and longitude
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -87,7 +142,7 @@ class SosScreen extends StatelessWidget {
                   Row(
                     children: [
                       Text(
-                        "Hi, Hasindu Rangika",
+                        "Hi, Anna Williams",
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
@@ -127,9 +182,29 @@ class SosScreen extends StatelessWidget {
                     ),
                   ),
                   SizedBox(height: 40),
+
+                  // SOS Button with click handling
                   GestureDetector(
                     onLongPress: () {
                       // Trigger SOS logic here
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: Text("SOS Activated!"),
+                            content: Text(
+                                "Help is on the way!\nYour location: $_currentLocation"),
+                            actions: [
+                              TextButton(
+                                child: Text("OK"),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                              ),
+                            ],
+                          );
+                        },
+                      );
                     },
                     child: Container(
                       height: 200,
@@ -154,6 +229,7 @@ class SosScreen extends StatelessWidget {
                       ),
                     ),
                   ),
+
                   SizedBox(height: 20),
                 ],
               ),
@@ -184,7 +260,7 @@ class SosScreen extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          "94/39 Gemunu Mawatha Minuwangoda",
+                          _currentLocation, // Display the current location here
                           style: TextStyle(
                             fontSize: 14,
                             color: Colors.black54,
@@ -223,7 +299,8 @@ class ChatScreen extends StatelessWidget {
   }
 }
 
-// Profile Screen (Sign Up Form)
+// medical Profile Screen
+
 class ProfileScreen extends StatelessWidget {
   final _formKey = GlobalKey<FormState>();
 
@@ -231,10 +308,17 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Sign Up'),
         backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
         elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.menu, color: Colors.black54),
+          onPressed: () {},
+        ),
+        title: Text(
+          "Hello,Hasindu",
+          style: TextStyle(color: Colors.black),
+        ),
+        centerTitle: true,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -242,47 +326,35 @@ class ProfileScreen extends StatelessWidget {
           key: _formKey,
           child: ListView(
             children: [
+              SizedBox(height: 20),
               Text(
-                "Personal Information",
+                "Health Profile",
                 style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black),
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 10),
+              Text(
+                "To keep you safe we get those",
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.black54,
+                ),
               ),
               SizedBox(height: 20),
-              buildTextFormField("Full Name", "Enter full name"),
+              buildTextFormField("Name", "Enter your name"),
               SizedBox(height: 20),
-              buildTextFormField("Phone Number", "Enter phone number",
+              buildTextFormField("Age", "Enter your age",
+                  keyboardType: TextInputType.number),
+              SizedBox(height: 20),
+              buildTextFormField("Phone Number", "Enter your phone number",
                   keyboardType: TextInputType.phone),
               SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(
-                    child: buildTextFormField("Date of Birth", "Day",
-                        keyboardType: TextInputType.number),
-                  ),
-                  SizedBox(width: 10),
-                  Expanded(
-                    child: buildTextFormField("", "Month",
-                        keyboardType: TextInputType.number),
-                  ),
-                  SizedBox(width: 10),
-                  Expanded(
-                    child: buildTextFormField("", "Year",
-                        keyboardType: TextInputType.number),
-                  ),
-                ],
-              ),
+              buildTextFormField("Blood Group", "Enter your blood group"),
               SizedBox(height: 20),
-              buildTextFormField("Email", "Enter your email",
-                  keyboardType: TextInputType.emailAddress),
-              SizedBox(height: 20),
-              buildTextFormField("Password", "Enter password",
-                  obscureText: true),
-              SizedBox(height: 20),
-              buildTextFormField("Confirm Password", "Confirm password",
-                  obscureText: true),
-              SizedBox(height: 30),
+              buildTextFormField("Allergies", "Enter your allergies"),
+              SizedBox(height: 40),
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
@@ -291,29 +363,17 @@ class ProfileScreen extends StatelessWidget {
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.redAccent,
-                  minimumSize: Size(double.infinity, 50),
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
-                child: Text("Continue", style: TextStyle(fontSize: 18)),
-              ),
-              SizedBox(height: 20),
-              Center(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text("Already have an account? "),
-                    GestureDetector(
-                      onTap: () {
-                        // Handle sign-in logic
-                      },
-                      child: Text(
-                        "Sign In",
-                        style: TextStyle(
-                          color: Colors.redAccent,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
+                child: Text(
+                  "Save",
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ],
@@ -332,12 +392,12 @@ class ProfileScreen extends StatelessWidget {
         labelText: label,
         hintText: hint,
         filled: true,
-        fillColor: Color(0xFFF5FCF9),
+        fillColor: Colors.grey[300], // Light grey background
         border: OutlineInputBorder(
           borderSide: BorderSide.none,
-          borderRadius: BorderRadius.circular(8.0),
+          borderRadius: BorderRadius.circular(12.0),
         ),
-        contentPadding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
+        contentPadding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 18.0),
       ),
       obscureText: obscureText,
       keyboardType: keyboardType,
