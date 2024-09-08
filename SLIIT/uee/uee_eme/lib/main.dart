@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:geolocator/geolocator.dart';
 import 'package:vibration/vibration.dart';
 import 'package:audioplayers/audioplayers.dart';
-import 'package:audioplayers/audio_cache.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SosScreen extends StatefulWidget {
@@ -228,7 +227,7 @@ class _CountdownScreenState extends State<CountdownScreen> {
 
   void _startCountdown() {
     // Play alert tone at the start
-    _audioPlayer.play(AssetSource('alert_tone.mp3'));
+    // _audioPlayer.play(AssetSource('alert_tone.mp3'));
 
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
       if (_counter > 0) {
