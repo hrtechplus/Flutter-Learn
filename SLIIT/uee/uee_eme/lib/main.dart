@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async'; // For using Timer
 import 'package:geolocator/geolocator.dart';
+import 'package:vibration/vibration.dart'; // Import the vibration package
 
 void main() {
   runApp(const MyApp());
@@ -31,7 +32,7 @@ class _MainAppState extends State<MainApp> {
     const SosScreen(),
     const HistoryScreen(),
     const ChatScreen(),
-    ProfileScreen(),
+    ProfileScreen(), // ProfileScreen is now Stateful
   ];
 
   void _onItemTapped(int index) {
@@ -82,11 +83,18 @@ class SosScreen extends StatefulWidget {
 
 class _SosScreenState extends State<SosScreen> {
   String _currentLocation = "Fetching location...";
+  bool _disposed = false; // Track if the widget is disposed
 
   @override
   void initState() {
     super.initState();
     _determinePosition();
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
   }
 
   Future<void> _determinePosition() async {
@@ -96,9 +104,11 @@ class _SosScreenState extends State<SosScreen> {
     // Test if location services are enabled.
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      setState(() {
-        _currentLocation = "Location services are disabled.";
-      });
+      if (!_disposed && mounted) {
+        setState(() {
+          _currentLocation = "Location services are disabled.";
+        });
+      }
       return;
     }
 
@@ -106,25 +116,31 @@ class _SosScreenState extends State<SosScreen> {
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        setState(() {
-          _currentLocation = "Location permissions are denied.";
-        });
+        if (!_disposed && mounted) {
+          setState(() {
+            _currentLocation = "Location permissions are denied.";
+          });
+        }
         return;
       }
     }
 
     if (permission == LocationPermission.deniedForever) {
-      setState(() {
-        _currentLocation = "Location permissions are permanently denied.";
-      });
+      if (!_disposed && mounted) {
+        setState(() {
+          _currentLocation = "Location permissions are permanently denied.";
+        });
+      }
       return;
     }
 
     Position position = await Geolocator.getCurrentPosition();
-    setState(() {
-      _currentLocation =
-          "${position.latitude}, ${position.longitude}"; // Display latitude and longitude
-    });
+    if (!_disposed && mounted) {
+      setState(() {
+        _currentLocation =
+            "${position.latitude}, ${position.longitude}"; // Display latitude and longitude
+      });
+    }
   }
 
   void _startCountdown() {
@@ -271,7 +287,7 @@ class _SosScreenState extends State<SosScreen> {
   }
 }
 
-// Countdown Screen with cancel functionality
+// Countdown Screen with vibration and cancel functionality
 class CountdownScreen extends StatefulWidget {
   const CountdownScreen({super.key});
 
@@ -282,6 +298,7 @@ class CountdownScreen extends StatefulWidget {
 class _CountdownScreenState extends State<CountdownScreen> {
   int _counter = 3; // Starting value of the countdown
   Timer? _timer;
+  bool _disposed = false;
 
   @override
   void initState() {
@@ -289,18 +306,35 @@ class _CountdownScreenState extends State<CountdownScreen> {
     _startCountdown();
   }
 
+  @override
+  void dispose() {
+    _disposed = true;
+    _timer
+        ?.cancel(); // Cancel the timer to prevent it from running after dispose
+    super.dispose();
+  }
+
   void _startCountdown() {
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (_counter > 0) {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) async {
+      if (_counter > 0 && mounted) {
         setState(() {
           _counter--;
         });
       } else {
         timer.cancel();
-        // Navigate to Emergency Active Screen after countdown finishes
-        _navigateToEmergencyActive();
+        await _vibrateAndNavigate();
       }
     });
+  }
+
+  Future<void> _vibrateAndNavigate() async {
+    bool? hasVibrator = await Vibration.hasVibrator();
+    if (hasVibrator ?? false) {
+      Vibration.vibrate(duration: 1000); // Vibrate for 1 second
+    }
+    if (!_disposed && mounted) {
+      _navigateToEmergencyActive();
+    }
   }
 
   void _navigateToEmergencyActive() {
@@ -362,13 +396,6 @@ class _CountdownScreenState extends State<CountdownScreen> {
       ),
     );
   }
-
-  @override
-  void dispose() {
-    _timer
-        ?.cancel(); // Make sure to cancel the timer when the widget is disposed
-    super.dispose();
-  }
 }
 
 // Emergency Active Screen
@@ -413,8 +440,7 @@ class EmergencyActiveScreen extends StatelessWidget {
               const SizedBox(height: 40),
               ElevatedButton(
                 onPressed: () {
-                  // Implement navigation logic or close the alert
-                  Navigator.pop(context);
+                  Navigator.pop(context); // Close or return to previous screen
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.redAccent,
