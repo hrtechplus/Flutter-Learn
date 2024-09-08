@@ -1,18 +1,87 @@
 import 'package:flutter/material.dart';
-import 'dart:async';
+import 'dart:async'; // For using Timer
 import 'package:geolocator/geolocator.dart';
-import 'package:vibration/vibration.dart';
-import 'package:audioplayers/audioplayers.dart';
-import 'package:url_launcher/url_launcher.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      home: MainApp(),
+      debugShowCheckedModeBanner: false,
+    );
+  }
+}
+
+class MainApp extends StatefulWidget {
+  const MainApp({super.key});
+
+  @override
+  _MainAppState createState() => _MainAppState();
+}
+
+class _MainAppState extends State<MainApp> {
+  int _selectedIndex = 0;
+  final List<Widget> _screens = [
+    const SosScreen(),
+    const HistoryScreen(),
+    const ChatScreen(),
+    ProfileScreen(),
+  ];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: _screens[_selectedIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.history),
+            label: 'History',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.chat),
+            label: 'Chat',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profile',
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: Colors.redAccent,
+        unselectedItemColor: Colors.grey,
+        onTap: _onItemTapped,
+      ),
+    );
+  }
+}
 
 class SosScreen extends StatefulWidget {
+  const SosScreen({super.key});
+
   @override
   _SosScreenState createState() => _SosScreenState();
 }
 
 class _SosScreenState extends State<SosScreen> {
   String _currentLocation = "Fetching location...";
-  String contactNumber = "+94710840270"; // Emergency contact
 
   @override
   void initState() {
@@ -24,6 +93,7 @@ class _SosScreenState extends State<SosScreen> {
     bool serviceEnabled;
     LocationPermission permission;
 
+    // Test if location services are enabled.
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       setState(() {
@@ -52,7 +122,8 @@ class _SosScreenState extends State<SosScreen> {
 
     Position position = await Geolocator.getCurrentPosition();
     setState(() {
-      _currentLocation = "${position.latitude}, ${position.longitude}";
+      _currentLocation =
+          "${position.latitude}, ${position.longitude}"; // Display latitude and longitude
     });
   }
 
@@ -60,10 +131,7 @@ class _SosScreenState extends State<SosScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => CountdownScreen(
-          currentLocation: _currentLocation,
-          contactNumber: contactNumber,
-        ),
+        builder: (context) => const CountdownScreen(),
       ),
     );
   }
@@ -76,9 +144,8 @@ class _SosScreenState extends State<SosScreen> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             // Custom App Bar
-            Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -106,16 +173,16 @@ class _SosScreenState extends State<SosScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
+                  const Text(
                     "Are you in an emergency?",
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(height: 10),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 40.0),
+                  const SizedBox(height: 10),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 40.0),
                     child: Text(
                       "Hold the SOS button for 3 seconds if you are in an urgent situation and need help. Your live location will be shared with the nearest facility.",
                       textAlign: TextAlign.center,
@@ -125,7 +192,7 @@ class _SosScreenState extends State<SosScreen> {
                       ),
                     ),
                   ),
-                  SizedBox(height: 40),
+                  const SizedBox(height: 40),
 
                   // SOS Button with click handling
                   GestureDetector(
@@ -134,7 +201,7 @@ class _SosScreenState extends State<SosScreen> {
                     child: Container(
                       height: 200,
                       width: 200,
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                         shape: BoxShape.circle,
                         gradient: LinearGradient(
                           colors: [Colors.redAccent, Colors.red],
@@ -142,7 +209,7 @@ class _SosScreenState extends State<SosScreen> {
                           end: Alignment.bottomRight,
                         ),
                       ),
-                      child: Center(
+                      child: const Center(
                         child: Text(
                           "SOS",
                           style: TextStyle(
@@ -155,28 +222,28 @@ class _SosScreenState extends State<SosScreen> {
                     ),
                   ),
 
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                 ],
               ),
             ),
 
             // Location Info
             Container(
-              margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              padding: EdgeInsets.all(16),
+              margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.grey[100],
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.location_on, color: Colors.redAccent),
-                  SizedBox(width: 10),
+                  const Icon(Icons.location_on, color: Colors.redAccent),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        const Text(
                           "Your current location",
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
@@ -186,7 +253,7 @@ class _SosScreenState extends State<SosScreen> {
                         ),
                         Text(
                           _currentLocation, // Display the current location here
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 14,
                             color: Colors.black54,
                           ),
@@ -204,11 +271,9 @@ class _SosScreenState extends State<SosScreen> {
   }
 }
 
+// Countdown Screen with cancel functionality
 class CountdownScreen extends StatefulWidget {
-  final String currentLocation;
-  final String contactNumber;
-
-  CountdownScreen({required this.currentLocation, required this.contactNumber});
+  const CountdownScreen({super.key});
 
   @override
   _CountdownScreenState createState() => _CountdownScreenState();
@@ -217,7 +282,6 @@ class CountdownScreen extends StatefulWidget {
 class _CountdownScreenState extends State<CountdownScreen> {
   int _counter = 3; // Starting value of the countdown
   Timer? _timer;
-  final AudioPlayer _audioPlayer = AudioPlayer();
 
   @override
   void initState() {
@@ -226,36 +290,26 @@ class _CountdownScreenState extends State<CountdownScreen> {
   }
 
   void _startCountdown() {
-    // Play alert tone at the start
-    // _audioPlayer.play(AssetSource('alert_tone.mp3'));
-
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_counter > 0) {
         setState(() {
           _counter--;
         });
       } else {
         timer.cancel();
-        // Vibrate and trigger SOS action after countdown
-        Vibration.vibrate(duration: 1000); // Vibrates for 1 second
-        _sendSosSignal();
+        // Navigate to Emergency Active Screen after countdown finishes
+        _navigateToEmergencyActive();
       }
     });
   }
 
-  Future<void> _sendSosSignal() async {
-    final Uri smsUri = Uri(
-      scheme: 'sms',
-      path: widget.contactNumber,
-      queryParameters: {
-        'body': 'Emergency! My current location is: ${widget.currentLocation}'
-      },
+  void _navigateToEmergencyActive() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const EmergencyActiveScreen(),
+      ),
     );
-    if (await canLaunchUrl(smsUri)) {
-      await launchUrl(smsUri);
-    } else {
-      print("Could not send SMS");
-    }
   }
 
   void _cancelCountdown() {
@@ -273,33 +327,33 @@ class _CountdownScreenState extends State<CountdownScreen> {
           // Countdown Timer Display
           Text(
             _counter.toString(),
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 100,
               color: Colors.red,
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: 40),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          const SizedBox(height: 40),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20.0),
             child: Text(
               "Sending location will start after count down, click cancel to exit",
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 16, color: Colors.black54),
             ),
           ),
-          SizedBox(height: 40),
+          const SizedBox(height: 40),
           // Cancel Button
           ElevatedButton(
             onPressed: _cancelCountdown,
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.redAccent,
-              padding: EdgeInsets.symmetric(vertical: 16, horizontal: 40),
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 40),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: Text(
+            child: const Text(
               "Cancel",
               style: TextStyle(fontSize: 18, color: Colors.white),
             ),
@@ -311,8 +365,212 @@ class _CountdownScreenState extends State<CountdownScreen> {
 
   @override
   void dispose() {
-    _timer?.cancel();
-    _audioPlayer.dispose();
+    _timer
+        ?.cancel(); // Make sure to cancel the timer when the widget is disposed
     super.dispose();
+  }
+}
+
+// Emergency Active Screen
+class EmergencyActiveScreen extends StatelessWidget {
+  const EmergencyActiveScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.warning_amber_rounded,
+                size: 100,
+                color: Colors.redAccent,
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                "Emergency Activated!",
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
+              const SizedBox(height: 10),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 40.0),
+                child: Text(
+                  "Your location has been shared, and help is on the way.",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.black54,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 40),
+              ElevatedButton(
+                onPressed: () {
+                  // Implement navigation logic or close the alert
+                  Navigator.pop(context);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.redAccent,
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 16, horizontal: 40),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  "OK",
+                  style: TextStyle(fontSize: 18, color: Colors.white),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// History Screen Placeholder
+class HistoryScreen extends StatelessWidget {
+  const HistoryScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: Text("History Screen", style: TextStyle(fontSize: 24)),
+    );
+  }
+}
+
+// Chat Screen Placeholder
+class ChatScreen extends StatelessWidget {
+  const ChatScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: Text("Chat Screen", style: TextStyle(fontSize: 24)),
+    );
+  }
+}
+
+// Profile Screen (medical form)
+class ProfileScreen extends StatelessWidget {
+  final _formKey = GlobalKey<FormState>();
+
+  ProfileScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.menu, color: Colors.black54),
+          onPressed: () {},
+        ),
+        title: const Text(
+          "Hello,Hasindu",
+          style: TextStyle(color: Colors.black),
+        ),
+        centerTitle: true,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            children: [
+              const SizedBox(height: 20),
+              const Text(
+                "Health Profile",
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 10),
+              const Text(
+                "To keep you safe we get those",
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.black54,
+                ),
+              ),
+              const SizedBox(height: 20),
+              buildTextFormField("Name", "Enter your name"),
+              const SizedBox(height: 20),
+              buildTextFormField("Age", "Enter your age",
+                  keyboardType: TextInputType.number),
+              const SizedBox(height: 20),
+              buildTextFormField("Phone Number", "Enter your phone number",
+                  keyboardType: TextInputType.phone),
+              const SizedBox(height: 20),
+              buildTextFormField("Blood Group", "Enter your blood group"),
+              const SizedBox(height: 20),
+              buildTextFormField("Allergies", "Enter your allergies"),
+              const SizedBox(height: 40),
+              ElevatedButton(
+                onPressed: () {
+                  if (_formKey.currentState!.validate()) {
+                    // Process data
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.redAccent,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  "Save",
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Custom Method to Build TextFormField Widgets
+  Widget buildTextFormField(String label, String hint,
+      {bool obscureText = false,
+      TextInputType keyboardType = TextInputType.text}) {
+    return TextFormField(
+      decoration: InputDecoration(
+        labelText: label,
+        hintText: hint,
+        filled: true,
+        fillColor: Colors.grey[300], // Light grey background
+        border: OutlineInputBorder(
+          borderSide: BorderSide.none,
+          borderRadius: BorderRadius.circular(12.0),
+        ),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16.0, vertical: 18.0),
+      ),
+      obscureText: obscureText,
+      keyboardType: keyboardType,
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter $label';
+        }
+        return null;
+      },
+    );
   }
 }

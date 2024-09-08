@@ -30,12 +30,12 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  shared_preferences: ^2.0.13
+  shared_preferences: ^2.0.15
   contacts_service: ^0.6.3
   permission_handler: ^10.0.0
   geolocator: ^9.0.2
-  audioplayers: ^0.20.1
   vibration: ^1.7.3
+  flutter_map: ^3.0.0
   url_launcher: ^6.1.6
 
   # The following adds the Cupertino Icons font to your application.

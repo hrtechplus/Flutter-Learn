@@ -4,13 +4,15 @@ import '../services/local_storage_service.dart';
 import '../widgets/form_input_field.dart';
 
 class ProfileScreen extends StatefulWidget {
+  const ProfileScreen({super.key});
+
   @override
   _ProfileScreenState createState() => _ProfileScreenState();
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final _formKey = GlobalKey<FormState>();
-  MedicalDetails _medicalDetails = MedicalDetails(
+  final MedicalDetails _medicalDetails = MedicalDetails(
       fullName: '',
       phone: '',
       bloodType: '',
@@ -20,7 +22,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Medical Details')),
+      appBar: AppBar(title: const Text('Medical Details')),
       body: Form(
         key: _formKey,
         child: ListView(
@@ -37,7 +39,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             // Add other fields similarly
             ElevatedButton(
               onPressed: _saveForm,
-              child: Text('Save'),
+              child: const Text('Save'),
             ),
           ],
         ),

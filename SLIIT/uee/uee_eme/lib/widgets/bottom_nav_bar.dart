@@ -4,6 +4,8 @@ import 'package:uee_eme/screens/profile_screen.dart';
 import 'package:uee_eme/screens/sos_screen.dart';
 
 class BottomNavBar extends StatefulWidget {
+  const BottomNavBar({super.key});
+
   @override
   _BottomNavBarState createState() => _BottomNavBarState();
 }
@@ -12,8 +14,8 @@ class _BottomNavBarState extends State<BottomNavBar> {
   int _currentIndex = 0;
 
   final List<Widget> _screens = [
-    ProfileScreen(), // Assuming ProfileScreen is another widget you've created
-    SOSScreen(), // Assuming SOSScreen is another widget you've created
+    const ProfileScreen(), // Assuming ProfileScreen is another widget you've created
+    const SOSScreen(), // Assuming SOSScreen is another widget you've created
   ];
 
   void _onTap(int index) {
@@ -29,7 +31,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: _onTap,
-        items: [
+        items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
             label: 'Profile',
