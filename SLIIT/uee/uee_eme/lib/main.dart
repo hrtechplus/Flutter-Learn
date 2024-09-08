@@ -1,72 +1,10 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'package:geolocator/geolocator.dart';
-
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: MainApp(),
-      debugShowCheckedModeBanner: false,
-    );
-  }
-}
-
-class MainApp extends StatefulWidget {
-  @override
-  _MainAppState createState() => _MainAppState();
-}
-
-class _MainAppState extends State<MainApp> {
-  int _selectedIndex = 0;
-  final List<Widget> _screens = [
-    SosScreen(),
-    HistoryScreen(),
-    ChatScreen(),
-    ProfileScreen(),
-  ];
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: _screens[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.history),
-            label: 'History',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.chat),
-            label: 'Chat',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: Colors.redAccent,
-        unselectedItemColor: Colors.grey,
-        onTap: _onItemTapped,
-      ),
-    );
-  }
-}
+import 'package:vibration/vibration.dart';
+import 'package:audioplayers/audioplayers.dart';
+import 'package:audioplayers/audio_cache.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SosScreen extends StatefulWidget {
   @override
@@ -75,6 +13,7 @@ class SosScreen extends StatefulWidget {
 
 class _SosScreenState extends State<SosScreen> {
   String _currentLocation = "Fetching location...";
+  String contactNumber = "+94710840270"; // Emergency contact
 
   @override
   void initState() {
@@ -86,10 +25,8 @@ class _SosScreenState extends State<SosScreen> {
     bool serviceEnabled;
     LocationPermission permission;
 
-    // Test if location services are enabled.
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      // Location services are not enabled, don't continue
       setState(() {
         _currentLocation = "Location services are disabled.";
       });
@@ -100,7 +37,6 @@ class _SosScreenState extends State<SosScreen> {
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        // Permissions are denied, show a message
         setState(() {
           _currentLocation = "Location permissions are denied.";
         });
@@ -109,19 +45,28 @@ class _SosScreenState extends State<SosScreen> {
     }
 
     if (permission == LocationPermission.deniedForever) {
-      // Permissions are permanently denied, show a message
       setState(() {
         _currentLocation = "Location permissions are permanently denied.";
       });
       return;
     }
 
-    // When permissions are granted, get the current position
     Position position = await Geolocator.getCurrentPosition();
     setState(() {
-      _currentLocation =
-          "${position.latitude}, ${position.longitude}"; // Display latitude and longitude
+      _currentLocation = "${position.latitude}, ${position.longitude}";
     });
+  }
+
+  void _startCountdown() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CountdownScreen(
+          currentLocation: _currentLocation,
+          contactNumber: contactNumber,
+        ),
+      ),
+    );
   }
 
   @override
@@ -142,7 +87,7 @@ class _SosScreenState extends State<SosScreen> {
                   Row(
                     children: [
                       Text(
-                        "Hi, Anna Williams",
+                        "Hi, Hasindu",
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
@@ -185,27 +130,8 @@ class _SosScreenState extends State<SosScreen> {
 
                   // SOS Button with click handling
                   GestureDetector(
-                    onLongPress: () {
-                      // Trigger SOS logic here
-                      showDialog(
-                        context: context,
-                        builder: (context) {
-                          return AlertDialog(
-                            title: Text("SOS Activated!"),
-                            content: Text(
-                                "Help is on the way!\nYour location: $_currentLocation"),
-                            actions: [
-                              TextButton(
-                                child: Text("OK"),
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                              ),
-                            ],
-                          );
-                        },
-                      );
-                    },
+                    onLongPress:
+                        _startCountdown, // Start countdown on long press
                     child: Container(
                       height: 200,
                       width: 200,
@@ -279,134 +205,115 @@ class _SosScreenState extends State<SosScreen> {
   }
 }
 
-// History Screen Placeholder
-class HistoryScreen extends StatelessWidget {
+class CountdownScreen extends StatefulWidget {
+  final String currentLocation;
+  final String contactNumber;
+
+  CountdownScreen({required this.currentLocation, required this.contactNumber});
+
   @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text("History Screen", style: TextStyle(fontSize: 24)),
-    );
-  }
+  _CountdownScreenState createState() => _CountdownScreenState();
 }
 
-// Chat Screen Placeholder
-class ChatScreen extends StatelessWidget {
+class _CountdownScreenState extends State<CountdownScreen> {
+  int _counter = 3; // Starting value of the countdown
+  Timer? _timer;
+  final AudioPlayer _audioPlayer = AudioPlayer();
+
   @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text("Chat Screen", style: TextStyle(fontSize: 24)),
-    );
+  void initState() {
+    super.initState();
+    _startCountdown();
   }
-}
 
-// medical Profile Screen
+  void _startCountdown() {
+    // Play alert tone at the start
+    _audioPlayer.play(AssetSource('alert_tone.mp3'));
 
-class ProfileScreen extends StatelessWidget {
-  final _formKey = GlobalKey<FormState>();
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      if (_counter > 0) {
+        setState(() {
+          _counter--;
+        });
+      } else {
+        timer.cancel();
+        // Vibrate and trigger SOS action after countdown
+        Vibration.vibrate(duration: 1000); // Vibrates for 1 second
+        _sendSosSignal();
+      }
+    });
+  }
+
+  Future<void> _sendSosSignal() async {
+    final Uri smsUri = Uri(
+      scheme: 'sms',
+      path: widget.contactNumber,
+      queryParameters: {
+        'body': 'Emergency! My current location is: ${widget.currentLocation}'
+      },
+    );
+    if (await canLaunchUrl(smsUri)) {
+      await launchUrl(smsUri);
+    } else {
+      print("Could not send SMS");
+    }
+  }
+
+  void _cancelCountdown() {
+    _timer?.cancel(); // Cancel the countdown
+    Navigator.pop(context); // Return to the previous screen
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.menu, color: Colors.black54),
-          onPressed: () {},
-        ),
-        title: Text(
-          "Hello,Hasindu",
-          style: TextStyle(color: Colors.black),
-        ),
-        centerTitle: true,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              SizedBox(height: 20),
-              Text(
-                "Health Profile",
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(height: 10),
-              Text(
-                "To keep you safe we get those",
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.black54,
-                ),
-              ),
-              SizedBox(height: 20),
-              buildTextFormField("Name", "Enter your name"),
-              SizedBox(height: 20),
-              buildTextFormField("Age", "Enter your age",
-                  keyboardType: TextInputType.number),
-              SizedBox(height: 20),
-              buildTextFormField("Phone Number", "Enter your phone number",
-                  keyboardType: TextInputType.phone),
-              SizedBox(height: 20),
-              buildTextFormField("Blood Group", "Enter your blood group"),
-              SizedBox(height: 20),
-              buildTextFormField("Allergies", "Enter your allergies"),
-              SizedBox(height: 40),
-              ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    // Process data
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.redAccent,
-                  padding: EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: Text(
-                  "Save",
-                  style: TextStyle(
-                    fontSize: 18,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ],
+      backgroundColor: Colors.white,
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Countdown Timer Display
+          Text(
+            _counter.toString(),
+            style: TextStyle(
+              fontSize: 100,
+              color: Colors.red,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
+          SizedBox(height: 40),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0),
+            child: Text(
+              "Sending location will start after count down, click cancel to exit",
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 16, color: Colors.black54),
+            ),
+          ),
+          SizedBox(height: 40),
+          // Cancel Button
+          ElevatedButton(
+            onPressed: _cancelCountdown,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              padding: EdgeInsets.symmetric(vertical: 16, horizontal: 40),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Text(
+              "Cancel",
+              style: TextStyle(fontSize: 18, color: Colors.white),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  // Custom Method to Build TextFormField Widgets
-  Widget buildTextFormField(String label, String hint,
-      {bool obscureText = false,
-      TextInputType keyboardType = TextInputType.text}) {
-    return TextFormField(
-      decoration: InputDecoration(
-        labelText: label,
-        hintText: hint,
-        filled: true,
-        fillColor: Colors.grey[300], // Light grey background
-        border: OutlineInputBorder(
-          borderSide: BorderSide.none,
-          borderRadius: BorderRadius.circular(12.0),
-        ),
-        contentPadding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 18.0),
-      ),
-      obscureText: obscureText,
-      keyboardType: keyboardType,
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Please enter $label';
-        }
-        return null;
-      },
-    );
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _audioPlayer.dispose();
+    super.dispose();
   }
 }
