@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "181153965013",
+    "firebase_url": "https://cansee-62420-default-rtdb.firebaseio.com",
+    "project_id": "cansee-62420",
+    "storage_bucket": "cansee-62420.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:181153965013:android:cb774f53d1c6e619bd135c",
+        "android_client_info": {
+          "package_name": "com.example.seemee"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCHkeDjY2cchfpmbIFEWLF70AEu6Ch7GSg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

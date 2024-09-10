@@ -1,4 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+ <!-- Insert the required permissions here -->
+
     <application
         android:label="can_see"
         android:name="${applicationName}"
