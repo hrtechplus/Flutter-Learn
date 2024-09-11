@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CreateFeedbackScreen extends StatefulWidget {
   @override
@@ -8,7 +9,9 @@ class CreateFeedbackScreen extends StatefulWidget {
 }
 
 class _CreateFeedbackScreenState extends State<CreateFeedbackScreen> {
-  String feedbackText = "The session science session was good.....";
+  // Controller to get the input text from the TextField
+  final TextEditingController _feedbackController = TextEditingController();
+
   FlutterTts? flutterTts; // Flutter TTS instance
   bool isSpeaking = false;
   bool isListening = false;
@@ -56,7 +59,8 @@ class _CreateFeedbackScreenState extends State<CreateFeedbackScreen> {
       setState(() {
         isSpeaking = true;
       });
-      await flutterTts?.speak(feedbackText);
+      await flutterTts?.speak(
+          _feedbackController.text); // Speak out the current feedback text
     }
   }
 
@@ -81,7 +85,8 @@ class _CreateFeedbackScreenState extends State<CreateFeedbackScreen> {
       await speechToText.listen(
         onResult: (result) {
           setState(() {
-            feedbackText = result.recognizedWords;
+            _feedbackController.text =
+                result.recognizedWords; // Update the TextField
           });
         },
         listenFor: Duration(seconds: 10),
@@ -101,6 +106,43 @@ class _CreateFeedbackScreenState extends State<CreateFeedbackScreen> {
     }
   }
 
+  // Save feedback to Firebase
+  Future<void> _saveFeedback() async {
+    try {
+      // Get the feedback text from the TextField
+      String feedbackText = _feedbackController.text;
+
+      if (feedbackText.isNotEmpty) {
+        CollectionReference feedbacks =
+            FirebaseFirestore.instance.collection('feedbacks');
+
+        await feedbacks.add({
+          'feedback': feedbackText, // The feedback text
+          'timestamp': FieldValue
+              .serverTimestamp(), // Timestamp for when feedback was saved
+        });
+
+        // Show success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Feedback saved successfully!')),
+        );
+
+        // Clear the text field after saving
+        _feedbackController.clear();
+      } else {
+        // Show error message if the text field is empty
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Feedback text cannot be empty!')),
+        );
+      }
+    } catch (e) {
+      // Handle errors
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to save feedback: $e')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -110,19 +152,15 @@ class _CreateFeedbackScreenState extends State<CreateFeedbackScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Feedback display text box
-            Container(
-              height: 200,
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey, width: 2.0),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              padding: const EdgeInsets.all(10.0),
-              child: SingleChildScrollView(
-                child: Text(
-                  feedbackText,
-                  style: const TextStyle(fontSize: 18),
-                ),
+            // Feedback input field
+            TextField(
+              controller:
+                  _feedbackController, // Bind the controller to this TextField
+              maxLines: 5,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Your feedback',
+                hintText: 'Enter feedback here...',
               ),
             ),
             const SizedBox(height: 30),
@@ -181,6 +219,14 @@ class _CreateFeedbackScreenState extends State<CreateFeedbackScreen> {
                   ),
                 ],
               ),
+            ),
+
+            const SizedBox(height: 30),
+
+            // Save feedback to Firebase button
+            ElevatedButton(
+              onPressed: _saveFeedback,
+              child: const Text('Save Feedback'),
             ),
           ],
         ),
