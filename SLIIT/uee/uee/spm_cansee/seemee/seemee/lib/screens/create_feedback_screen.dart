@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_tts/flutter_tts.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_tts/flutter_tts.dart'; // Import TTS package
 
 class CreateFeedbackScreen extends StatefulWidget {
   @override
@@ -9,36 +9,18 @@ class CreateFeedbackScreen extends StatefulWidget {
 }
 
 class _CreateFeedbackScreenState extends State<CreateFeedbackScreen> {
-  // Controller to get the input text from the TextField
-  final TextEditingController _feedbackController = TextEditingController();
-
-  FlutterTts? flutterTts; // Flutter TTS instance
-  bool isSpeaking = false;
-  bool isListening = false;
   late stt.SpeechToText speechToText; // Speech to text instance
+  bool isListening = false;
   bool _speechAvailable = false; // To check if speech recognition is available
+  final TextEditingController _feedbackController =
+      TextEditingController(); // To capture text input
+  late FlutterTts flutterTts; // For Text-to-Speech
 
   @override
   void initState() {
     super.initState();
-    _initTts();
     _initSpeech();
-  }
-
-  // Initialize TTS settings
-  Future<void> _initTts() async {
-    flutterTts = FlutterTts();
-    await flutterTts?.setLanguage("en-US");
-    await flutterTts?.setSpeechRate(0.5); // Adjust speech rate
-    await flutterTts?.setVolume(1.0); // Full volume
-    await flutterTts?.setPitch(1.0); // Normal pitch
-
-    // Listening to when speech ends
-    flutterTts?.setCompletionHandler(() {
-      setState(() {
-        isSpeaking = false;
-      });
-    });
+    _initTTS(); // Initialize TTS when the page loads
   }
 
   // Initialize Speech to Text
@@ -51,30 +33,23 @@ class _CreateFeedbackScreenState extends State<CreateFeedbackScreen> {
     setState(() {});
   }
 
-  // Method to start speaking (TTS)
-  void _speak() async {
-    if (flutterTts == null) return; // Ensure flutterTts is initialized
+  // Initialize Text-to-Speech (TTS)
+  void _initTTS() async {
+    flutterTts = FlutterTts();
+    await flutterTts.setLanguage("en-US");
+    await flutterTts.setSpeechRate(0.5);
+    await flutterTts.setVolume(1.0);
+    await flutterTts.setPitch(1.0);
 
-    if (!isSpeaking) {
-      setState(() {
-        isSpeaking = true;
-      });
-      await flutterTts?.speak(
-          _feedbackController.text); // Speak out the current feedback text
-    }
+    _speakPrompt(); // Automatically speak the message when the page appears
   }
 
-  // Method to stop speaking (TTS)
-  void _stop() async {
-    if (flutterTts == null) return; // Ensure flutterTts is initialized
-
-    setState(() {
-      isSpeaking = false;
-    });
-    await flutterTts?.stop();
+  // Speak the prompt when the page appears
+  void _speakPrompt() async {
+    await flutterTts.speak("You can record your voice feedback now");
   }
 
-  // Method to start listening (STT)
+  // Method to start listening (Speech-to-Text) for feedback
   void _startListening() async {
     if (_speechAvailable && !isListening) {
       setState(() {
@@ -85,8 +60,8 @@ class _CreateFeedbackScreenState extends State<CreateFeedbackScreen> {
       await speechToText.listen(
         onResult: (result) {
           setState(() {
-            _feedbackController.text =
-                result.recognizedWords; // Update the TextField
+            _feedbackController.text = result
+                .recognizedWords; // Update TextField with recognized words
           });
         },
         listenFor: Duration(seconds: 10),
@@ -96,7 +71,7 @@ class _CreateFeedbackScreenState extends State<CreateFeedbackScreen> {
     }
   }
 
-  // Method to stop listening (STT)
+  // Method to stop listening (Speech-to-Text)
   void _stopListening() async {
     if (isListening) {
       await speechToText.stop();
@@ -122,6 +97,9 @@ class _CreateFeedbackScreenState extends State<CreateFeedbackScreen> {
               .serverTimestamp(), // Timestamp for when feedback was saved
         });
 
+        // Debugging print statement to verify saving process
+        print("Feedback saved: $feedbackText");
+
         // Show success message
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Feedback saved successfully!')),
@@ -137,6 +115,7 @@ class _CreateFeedbackScreenState extends State<CreateFeedbackScreen> {
       }
     } catch (e) {
       // Handle errors
+      print("Error saving feedback: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to save feedback: $e')),
       );
@@ -145,91 +124,104 @@ class _CreateFeedbackScreenState extends State<CreateFeedbackScreen> {
 
   @override
   Widget build(BuildContext context) {
+    double screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
-      appBar: AppBar(title: const Text("Create Feedback")),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Feedback input field
-            TextField(
-              controller:
-                  _feedbackController, // Bind the controller to this TextField
-              maxLines: 5,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Your feedback',
-                hintText: 'Enter feedback here...',
+      appBar: AppBar(),
+      body: Column(
+        children: [
+          // Top 50% of the screen for feedback display
+          Container(
+            height: screenHeight * 0.5, // Top 50% of the screen
+            width: double.infinity,
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey, width: 2.0),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            padding: const EdgeInsets.all(20.0),
+            margin: const EdgeInsets.all(16.0),
+            child: SingleChildScrollView(
+              child: Text(
+                _feedbackController.text.isNotEmpty
+                    ? _feedbackController.text
+                    : "Your feedback will appear here...",
+                style: const TextStyle(
+                    fontSize: 20), // Larger font size for readability
               ),
             ),
-            const SizedBox(height: 30),
+          ),
 
-            // Microphone button to trigger STT (listen to user's voice and capture text)
-            GestureDetector(
-              onTap: isListening ? _stopListening : _startListening,
-              child: Column(
+          // Bottom 50% of the screen for buttons
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      color: isListening ? Colors.redAccent : Colors.grey,
-                      borderRadius: BorderRadius.circular(40),
-                    ),
-                    child: const Icon(
-                      Icons.mic,
-                      color: Colors.white,
-                      size: 40,
+                  // Microphone button for recording feedback
+                  GestureDetector(
+                    onTap: isListening ? _stopListening : _startListening,
+                    child: Container(
+                      height: screenHeight *
+                          0.2, // Large button, 20% of screen height
+                      width: screenHeight * 0.2, // Make button square
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey, width: 2),
+                        borderRadius:
+                            BorderRadius.circular(20), // Rounded edges
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.mic,
+                            size: 60, // Larger icon for accessibility
+                            color: Colors.redAccent,
+                          ),
+                          const SizedBox(height: 10),
+                          const Text(
+                            "Record Feedback",
+                            style: TextStyle(fontSize: 18),
+                          )
+                        ],
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  Text(
-                    isListening ? "Listening..." : "Tap to Speak",
-                    style: const TextStyle(fontSize: 16, color: Colors.grey),
+
+                  // Button for sending feedback
+                  GestureDetector(
+                    onTap: _saveFeedback,
+                    child: Container(
+                      height: screenHeight *
+                          0.2, // Large button, 20% of screen height
+                      width: screenHeight * 0.2, // Make button square
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey, width: 2),
+                        borderRadius:
+                            BorderRadius.circular(20), // Rounded edges
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.send,
+                            size: 60, // Larger icon for accessibility
+                            color: Colors.redAccent,
+                          ),
+                          const SizedBox(height: 10),
+                          const Text(
+                            "Send Feedback",
+                            style: TextStyle(fontSize: 18),
+                          )
+                        ],
+                      ),
+                    ),
                   ),
                 ],
               ),
             ),
-
-            const SizedBox(height: 30),
-
-            // Button to trigger TTS (speak out the feedback text)
-            GestureDetector(
-              onTap: isSpeaking ? _stop : _speak,
-              child: Column(
-                children: [
-                  Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      color: isSpeaking ? Colors.redAccent : Colors.blueGrey,
-                      borderRadius: BorderRadius.circular(40),
-                    ),
-                    child: const Icon(
-                      Icons.volume_up,
-                      color: Colors.white,
-                      size: 40,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    isSpeaking ? "Speaking..." : "Tap to Listen",
-                    style: const TextStyle(fontSize: 16, color: Colors.grey),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 30),
-
-            // Save feedback to Firebase button
-            ElevatedButton(
-              onPressed: _saveFeedback,
-              child: const Text('Save Feedback'),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
