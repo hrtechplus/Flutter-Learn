@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_tts/flutter_tts.dart'; // Import TTS package
+import 'package:flutter_tts/flutter_tts.dart';
+import 'package:intl/intl.dart'; // For formatting date and time
 
 class CreateFeedbackScreen extends StatefulWidget {
   @override
@@ -60,8 +61,7 @@ class _CreateFeedbackScreenState extends State<CreateFeedbackScreen> {
       await speechToText.listen(
         onResult: (result) {
           setState(() {
-            _feedbackController.text = result
-                .recognizedWords; // Update TextField with recognized words
+            _feedbackController.text = result.recognizedWords;
           });
         },
         listenFor: Duration(seconds: 10),
@@ -88,17 +88,22 @@ class _CreateFeedbackScreenState extends State<CreateFeedbackScreen> {
       String feedbackText = _feedbackController.text;
 
       if (feedbackText.isNotEmpty) {
+        // Get current date and time in a readable format
+        String formattedDateTime = DateFormat('yyyy-MM-dd – HH:mm:ss')
+            .format(DateTime.now()); // Example: 2024-09-10 – 14:30:45
+
+        // Add the feedback along with timestamp and formatted date/time
         CollectionReference feedbacks =
             FirebaseFirestore.instance.collection('feedbacks');
 
         await feedbacks.add({
           'feedback': feedbackText, // The feedback text
-          'timestamp': FieldValue
-              .serverTimestamp(), // Timestamp for when feedback was saved
+          'timestamp': FieldValue.serverTimestamp(), // Server timestamp
+          'dateTime': formattedDateTime, // Human-readable date/time
         });
 
         // Debugging print statement to verify saving process
-        print("Feedback saved: $feedbackText");
+        print("Feedback saved: $feedbackText on $formattedDateTime");
 
         // Show success message
         ScaffoldMessenger.of(context).showSnackBar(
@@ -127,7 +132,9 @@ class _CreateFeedbackScreenState extends State<CreateFeedbackScreen> {
     double screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        title: const Text("Create Feedback"),
+      ),
       body: Column(
         children: [
           // Top 50% of the screen for feedback display

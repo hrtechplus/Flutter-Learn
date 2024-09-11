@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart'; // For date formatting
 
 class ReadFeedbackScreen extends StatefulWidget {
   @override
@@ -22,6 +23,21 @@ class _ReadFeedbackScreenState extends State<ReadFeedbackScreen> {
     await _flutterTts.speak("Your feedback is: $feedbackText");
   }
 
+  // Method to format date and time
+  String _formatTimestamp(Timestamp timestamp) {
+    DateTime date = timestamp.toDate();
+    return DateFormat('yyyy-MM-dd – kk:mm')
+        .format(date); // Example: 2023-09-10 – 14:30
+  }
+
+  // Generate a dynamic title from the feedback text
+  String _generateTitle(String feedbackText) {
+    // Take the first 20 characters or less to create a dynamic title
+    return feedbackText.length > 20
+        ? feedbackText.substring(0, 20) + "..."
+        : feedbackText;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,7 +46,7 @@ class _ReadFeedbackScreenState extends State<ReadFeedbackScreen> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // Display feedback list
+            // Display feedback list (dynamic)
             Expanded(
               child: StreamBuilder(
                 stream: feedbacks
@@ -43,10 +59,15 @@ class _ReadFeedbackScreenState extends State<ReadFeedbackScreen> {
 
                   return ListView(
                     children: snapshot.data!.docs.map((document) {
-                      String feedbackText = document['feedback'];
+                      // Check if feedback exists and handle potential null cases
+                      String feedbackText =
+                          document['feedback'] ?? 'No feedback provided';
                       Timestamp timestamp =
                           document['timestamp'] ?? Timestamp.now();
-                      DateTime date = timestamp.toDate();
+
+                      // Dynamically generate a title and format the timestamp
+                      String feedbackTitle = _generateTitle(feedbackText);
+                      String formattedDateTime = _formatTimestamp(timestamp);
 
                       return Card(
                         shape: RoundedRectangleBorder(
@@ -55,9 +76,10 @@ class _ReadFeedbackScreenState extends State<ReadFeedbackScreen> {
                         ),
                         margin: const EdgeInsets.symmetric(vertical: 8),
                         child: ListTile(
-                          title: Text("Feedback title"),
-                          subtitle: Text("${date.toLocal()}"
-                              .split(' ')[0]), // Show only the date part
+                          title: Text(
+                              feedbackTitle), // Dynamic title from feedback
+                          subtitle:
+                              Text(formattedDateTime), // Dynamic date and time
                           trailing: IconButton(
                             icon: const Icon(Icons.play_arrow),
                             onPressed: () => _readFeedback(
@@ -80,22 +102,22 @@ class _ReadFeedbackScreenState extends State<ReadFeedbackScreen> {
               child: Column(
                 children: [
                   Container(
-                    width: 80,
-                    height: 80,
+                    width: 150,
+                    height: 150,
                     decoration: BoxDecoration(
                       color: Colors.redAccent,
-                      borderRadius: BorderRadius.circular(40),
+                      borderRadius: BorderRadius.circular(75), // Rounded circle
                     ),
                     child: const Icon(
                       Icons.mic,
                       color: Colors.white,
-                      size: 40,
+                      size: 70, // Larger icon for accessibility
                     ),
                   ),
                   const SizedBox(height: 10),
                   const Text(
                     "Listening...",
-                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                    style: TextStyle(fontSize: 18, color: Colors.grey),
                   ),
                 ],
               ),
