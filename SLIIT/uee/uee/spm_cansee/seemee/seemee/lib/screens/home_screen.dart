@@ -12,40 +12,41 @@ class HomeScreen extends StatelessWidget {
     double screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Buttons in a 2x2 grid
-            Expanded(
-              child: GridView.count(
-                shrinkWrap: true,
-                crossAxisCount: 2,
-                crossAxisSpacing: 15,
-                mainAxisSpacing: 15,
-                padding: const EdgeInsets.all(20.0),
-                children: [
-                  _buildNavigationButton(
-                      context, Icons.add, "Create", CreateFeedbackScreen()),
-                  _buildNavigationButton(
-                      context, Icons.edit, "Update", UpdateFeedbackScreen()),
-                  _buildNavigationButton(
-                      context, Icons.delete, "Delete", DeleteFeedbackScreen()),
-                  _buildNavigationButton(
-                      context, Icons.list, "Read", ReadFeedbackScreen()),
-                ],
-              ),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Grid of buttons with fixed height and spacing
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 30.0),
+            child: GridView.count(
+              shrinkWrap: true,
+              crossAxisCount: 2,
+              crossAxisSpacing: 20,
+              mainAxisSpacing: 20,
+              children: [
+                _buildNavigationButton(
+                    context, Icons.add, "Create", CreateFeedbackScreen()),
+                _buildNavigationButton(
+                    context, Icons.edit, "Update", UpdateFeedbackScreen()),
+                _buildNavigationButton(
+                    context, Icons.delete, "Delete", DeleteFeedbackScreen()),
+                _buildNavigationButton(
+                    context, Icons.list, "Read", ReadFeedbackScreen()),
+              ],
             ),
-            const Divider(),
-            // Microphone icon at the bottom (about 25% of the screen height)
-            Container(
-              height: screenHeight * 0.25,
-              child: Center(
-                child: _buildMicrophoneIcon(),
-              ),
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 30), // Space between grid and microphone
+          // Divider as seen in the image
+          const Divider(
+            thickness: 2.0,
+            indent: 50,
+            endIndent: 50,
+          ),
+          const SizedBox(height: 20),
+          // Microphone icon at the bottom, centered
+          _buildMicrophoneIcon(),
+          const SizedBox(height: 20), // Padding below the microphone
+        ],
       ),
     );
   }
@@ -60,16 +61,16 @@ class HomeScreen extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: Colors.redAccent,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(15), // More rounded corners
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: Colors.white, size: 40),
+            Icon(icon, color: Colors.white, size: 50),
             const SizedBox(height: 10),
             Text(
               label,
-              style: const TextStyle(color: Colors.white, fontSize: 16),
+              style: const TextStyle(color: Colors.white, fontSize: 18),
             ),
           ],
         ),
@@ -83,16 +84,16 @@ class HomeScreen extends StatelessWidget {
         // Microphone on tap functionality
       },
       child: Container(
-        width: 100,
-        height: 100,
+        width: 120,
+        height: 120,
         decoration: BoxDecoration(
           color: Colors.redAccent,
-          borderRadius: BorderRadius.circular(50),
+          borderRadius: BorderRadius.circular(60), // Circular button
         ),
         child: const Icon(
           Icons.mic,
           color: Colors.white,
-          size: 50,
+          size: 60, // Larger icon for emphasis
         ),
       ),
     );
