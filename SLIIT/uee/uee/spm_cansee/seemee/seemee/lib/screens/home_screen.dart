@@ -1,11 +1,84 @@
 import 'package:flutter/material.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'create_feedback_screen.dart';
 import 'read_feedback_screen.dart';
 import 'update_feedback_screen.dart';
 import 'delete_feedback_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  late stt.SpeechToText _speechToText;
+  bool _isListening = false;
+  String _commandText = "";
+
+  @override
+  void initState() {
+    super.initState();
+    _speechToText = stt.SpeechToText(); // Initialize speech recognition
+  }
+
+  // Start listening for voice commands
+  void _startListening() async {
+    if (!_isListening) {
+      bool available = await _speechToText.initialize();
+      if (available) {
+        setState(() {
+          _isListening = true;
+        });
+        _speechToText.listen(onResult: (result) {
+          setState(() {
+            _commandText = result.recognizedWords;
+          });
+          _executeCommand(_commandText);
+        });
+      } else {
+        // Handle the case where speech recognition is not available
+        print("Speech recognition not available");
+      }
+    }
+  }
+
+  // Stop listening for voice commands
+  void _stopListening() async {
+    if (_isListening) {
+      await _speechToText.stop();
+      setState(() {
+        _isListening = false;
+      });
+    }
+  }
+
+  // Execute the command based on recognized words
+  void _executeCommand(String command) {
+    command = command.toLowerCase(); // Convert to lowercase for easy comparison
+
+    if (command.contains("create")) {
+      _navigateToScreen(CreateFeedbackScreen());
+    } else if (command.contains("read")) {
+      _navigateToScreen(ReadFeedbackScreen());
+    } else if (command.contains("update")) {
+      _navigateToScreen(UpdateFeedbackScreen());
+    } else if (command.contains("delete")) {
+      _navigateToScreen(DeleteFeedbackScreen());
+    } else {
+      // Command not recognized, show message or take alternative action
+      print("Command not recognized");
+    }
+  }
+
+  // Method to navigate to a specific screen
+  void _navigateToScreen(Widget screen) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => screen),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,8 +99,8 @@ class HomeScreen extends StatelessWidget {
               children: [
                 _buildNavigationButton(
                     context, Icons.add, "Create", CreateFeedbackScreen()),
-                _buildNavigationButton(
-                    context, Icons.edit, "Update", UpdateFeedbackScreen()),
+                _buildNavigationButton(context, Icons.edit, "Update",
+                    const UpdateFeedbackScreen()),
                 _buildNavigationButton(
                     context, Icons.delete, "Delete", DeleteFeedbackScreen()),
                 _buildNavigationButton(
@@ -36,7 +109,6 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 30), // Space between grid and microphone
-          // Divider as seen in the image
           const Divider(
             thickness: 2.0,
             indent: 50,
@@ -80,18 +152,22 @@ class HomeScreen extends StatelessWidget {
 
   Widget _buildMicrophoneIcon() {
     return GestureDetector(
-      onTap: () {
-        // Microphone on tap functionality
-      },
+      onTap: _isListening
+          ? _stopListening
+          : _startListening, // Start or stop listening
       child: Container(
         width: 120,
         height: 120,
         decoration: BoxDecoration(
-          color: Colors.redAccent,
+          color: _isListening
+              ? Colors.green
+              : Colors.redAccent, // Change color when listening
           borderRadius: BorderRadius.circular(60), // Circular button
         ),
-        child: const Icon(
-          Icons.mic,
+        child: Icon(
+          _isListening
+              ? Icons.mic
+              : Icons.mic_none, // Change icon when listening
           color: Colors.white,
           size: 60, // Larger icon for emphasis
         ),

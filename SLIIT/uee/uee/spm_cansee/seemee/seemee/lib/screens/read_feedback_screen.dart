@@ -2,6 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart'; // For date formatting
+import 'package:speech_to_text/speech_to_text.dart' as stt;
+
+import 'create_feedback_screen.dart';
+import 'read_feedback_screen.dart';
+import 'update_feedback_screen.dart';
+import 'delete_feedback_screen.dart';
 
 class ReadFeedbackScreen extends StatefulWidget {
   @override
@@ -11,11 +17,23 @@ class ReadFeedbackScreen extends StatefulWidget {
 class _ReadFeedbackScreenState extends State<ReadFeedbackScreen> {
   final FlutterTts _flutterTts = FlutterTts();
   late CollectionReference feedbacks;
+  late stt.SpeechToText _speechToText; // Speech-to-text instance
+  bool _isListening = false;
+  String _commandText = "";
+  bool _speechEnabled = false; // Flag to check if speech-to-text is available
 
   @override
   void initState() {
     super.initState();
     feedbacks = FirebaseFirestore.instance.collection('feedbacks');
+    _initSpeechToText(); // Initialize the speech-to-text functionality
+  }
+
+  // Initialize the speech-to-text functionality
+  void _initSpeechToText() async {
+    _speechToText = stt.SpeechToText(); // Initialize the instance
+    _speechEnabled = await _speechToText.initialize();
+    setState(() {}); // Update UI based on the initialization result
   }
 
   // Method to read the feedback out loud using TTS
@@ -36,6 +54,61 @@ class _ReadFeedbackScreenState extends State<ReadFeedbackScreen> {
     return feedbackText.length > 20
         ? feedbackText.substring(0, 20) + "..."
         : feedbackText;
+  }
+
+  // Start listening for voice commands
+  void _startListening() async {
+    if (_speechEnabled && !_isListening) {
+      // Only start if speech-to-text is initialized
+      setState(() {
+        _isListening = true;
+      });
+      _speechToText.listen(onResult: (result) {
+        setState(() {
+          _commandText = result.recognizedWords;
+        });
+        _executeCommand(_commandText);
+      });
+    } else {
+      print("Speech recognition not available");
+    }
+  }
+
+  // Stop listening for voice commands
+  void _stopListening() async {
+    if (_isListening) {
+      await _speechToText.stop();
+      setState(() {
+        _isListening = false;
+      });
+    }
+  }
+
+  // Execute command based on recognized voice input
+  void _executeCommand(String command) {
+    command = command.toLowerCase(); // Normalize command to lowercase
+
+    // Custom command processing logic
+    if (command.contains("create")) {
+      _navigateToScreen(CreateFeedbackScreen());
+    } else if (command.contains("read")) {
+      _navigateToScreen(ReadFeedbackScreen());
+    } else if (command.contains("update")) {
+      _navigateToScreen(const UpdateFeedbackScreen());
+    } else if (command.contains("delete")) {
+      _navigateToScreen(DeleteFeedbackScreen());
+    } else {
+      // Command not recognized, show message or take alternative action
+      print("Command not recognized");
+    }
+  }
+
+  // Navigate to the corresponding screen
+  void _navigateToScreen(Widget screen) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => screen),
+    );
   }
 
   @override
@@ -96,16 +169,18 @@ class _ReadFeedbackScreenState extends State<ReadFeedbackScreen> {
             // Microphone button at the bottom
             const Divider(),
             GestureDetector(
-              onTap: () {
-                // Start listening to the user's voice
-              },
+              onTap: _isListening
+                  ? _stopListening
+                  : _startListening, // Start or stop listening
               child: Column(
                 children: [
                   Container(
                     width: 150,
                     height: 150,
                     decoration: BoxDecoration(
-                      color: Colors.redAccent,
+                      color: _isListening
+                          ? Colors.green
+                          : Colors.redAccent, // Change color when listening
                       borderRadius: BorderRadius.circular(75), // Rounded circle
                     ),
                     child: const Icon(
