@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; // Use Firestore
 
 class UserFormScreen extends StatefulWidget {
+  const UserFormScreen({super.key});
+
   @override
   _UserFormScreenState createState() => _UserFormScreenState();
 }
@@ -24,7 +26,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
         'email': _email,
       }).then((_) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('User data saved successfully!')),
+          const SnackBar(content: Text('User data saved successfully!')),
         );
         _fetchUserData(); // Fetch data after saving
       }).catchError((error) {
@@ -40,12 +42,12 @@ class _UserFormScreenState extends State<UserFormScreen> {
   void _fetchUserData() {
     _usersCollection.get().then((QuerySnapshot querySnapshot) {
       List<Map<String, String>> usersList = [];
-      querySnapshot.docs.forEach((doc) {
+      for (var doc in querySnapshot.docs) {
         usersList.add({
           'name': doc['name'],
           'email': doc['email'],
         });
-      });
+      }
       setState(() {
         _users = usersList;
       });
@@ -64,7 +66,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('User Formmmmmmmm'),
+        title: const Text('User Formmmmmmmm'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -75,7 +77,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
               child: Column(
                 children: [
                   TextFormField(
-                    decoration: InputDecoration(labelText: 'Name'),
+                    decoration: const InputDecoration(labelText: 'Name'),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your name';
@@ -87,7 +89,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
                     },
                   ),
                   TextFormField(
-                    decoration: InputDecoration(labelText: 'Email'),
+                    decoration: const InputDecoration(labelText: 'Email'),
                     validator: (value) {
                       if (value == null ||
                           value.isEmpty ||
@@ -100,15 +102,15 @@ class _UserFormScreenState extends State<UserFormScreen> {
                       _email = value!;
                     },
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: _saveUserData,
-                    child: Text('Submit'),
+                    child: const Text('Submit'),
                   ),
                 ],
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Expanded(
               child: ListView.builder(
                 itemCount: _users.length,
