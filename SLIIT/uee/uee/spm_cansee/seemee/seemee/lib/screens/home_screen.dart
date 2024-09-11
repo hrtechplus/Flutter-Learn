@@ -58,13 +58,13 @@ class _HomeScreenState extends State<HomeScreen> {
   void _executeCommand(String command) {
     command = command.toLowerCase(); // Convert to lowercase for easy comparison
 
-    if (command.contains("create")) {
+    if (command.contains("create feedback")) {
       _navigateToScreen(CreateFeedbackScreen());
-    } else if (command.contains("read")) {
+    } else if (command.contains("read feedbacks")) {
       _navigateToScreen(ReadFeedbackScreen());
-    } else if (command.contains("update")) {
+    } else if (command.contains("edit feedbacks")) {
       _navigateToScreen(UpdateFeedbackScreen());
-    } else if (command.contains("delete")) {
+    } else if (command.contains("delete feedbacks")) {
       _navigateToScreen(DeleteFeedbackScreen());
     } else {
       // Command not recognized, show message or take alternative action
@@ -98,13 +98,13 @@ class _HomeScreenState extends State<HomeScreen> {
               mainAxisSpacing: 20,
               children: [
                 _buildNavigationButton(
-                    context, Icons.add, "Create", CreateFeedbackScreen()),
-                _buildNavigationButton(context, Icons.edit, "Update",
-                    const UpdateFeedbackScreen()),
+                    context, Icons.add, "Add", CreateFeedbackScreen()),
+                _buildNavigationButton(
+                    context, Icons.edit, "Edit", const UpdateFeedbackScreen()),
                 _buildNavigationButton(
                     context, Icons.delete, "Delete", DeleteFeedbackScreen()),
                 _buildNavigationButton(
-                    context, Icons.list, "Read", ReadFeedbackScreen()),
+                    context, Icons.list, "Show", ReadFeedbackScreen()),
               ],
             ),
           ),

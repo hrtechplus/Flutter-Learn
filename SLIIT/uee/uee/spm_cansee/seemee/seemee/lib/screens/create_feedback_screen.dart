@@ -3,6 +3,8 @@ import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:intl/intl.dart'; // For formatting date and time
+import 'package:flutter/services.dart'; // For haptic feedback
+import 'package:vibration/vibration.dart'; // Vibration package
 
 class CreateFeedbackScreen extends StatefulWidget {
   @override
@@ -50,12 +52,24 @@ class _CreateFeedbackScreenState extends State<CreateFeedbackScreen> {
     await flutterTts.speak("You can record your voice feedback now");
   }
 
+  // Start vibration and haptic feedback when recording starts
+  void _vibrateAndHaptic() async {
+    HapticFeedback.mediumImpact(); // Provide medium haptic feedback
+
+    // Check if vibration is available and trigger it
+    if (await Vibration.hasVibrator() ?? false) {
+      Vibration.vibrate(duration: 200); // Vibrate for 200ms
+    }
+  }
+
   // Method to start listening (Speech-to-Text) for feedback
   void _startListening() async {
     if (_speechAvailable && !isListening) {
       setState(() {
         isListening = true;
       });
+
+      _vibrateAndHaptic(); // Trigger haptic and vibration feedback when listening starts
 
       // Start listening to speech and update the text as recognized
       await speechToText.listen(
@@ -71,13 +85,16 @@ class _CreateFeedbackScreenState extends State<CreateFeedbackScreen> {
     }
   }
 
-  // Method to stop listening (Speech-to-Text)
+  // Method to stop listening (Speech-to-Text) and provide haptic feedback
   void _stopListening() async {
     if (isListening) {
       await speechToText.stop();
       setState(() {
         isListening = false;
       });
+
+      HapticFeedback
+          .lightImpact(); // Provide light haptic feedback when stopping
     }
   }
 
