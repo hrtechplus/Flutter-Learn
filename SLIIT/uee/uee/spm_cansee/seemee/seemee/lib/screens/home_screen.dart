@@ -9,32 +9,41 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    double screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Buttons in a grid format
-            GridView.count(
-              shrinkWrap: true,
-              crossAxisCount: 2,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-              padding: const EdgeInsets.all(20.0),
-              children: [
-                _buildNavigationButton(
-                    context, Icons.add, "Create", CreateFeedbackScreen()),
-                _buildNavigationButton(
-                    context, Icons.edit, "Update", UpdateFeedbackScreen()),
-                _buildNavigationButton(
-                    context, Icons.delete, "Delete", DeleteFeedbackScreen()),
-                _buildNavigationButton(
-                    context, Icons.list, "Read", ReadFeedbackScreen()),
-              ],
+            // Buttons in a 2x2 grid
+            Expanded(
+              child: GridView.count(
+                shrinkWrap: true,
+                crossAxisCount: 2,
+                crossAxisSpacing: 15,
+                mainAxisSpacing: 15,
+                padding: const EdgeInsets.all(20.0),
+                children: [
+                  _buildNavigationButton(
+                      context, Icons.add, "Create", CreateFeedbackScreen()),
+                  _buildNavigationButton(
+                      context, Icons.edit, "Update", UpdateFeedbackScreen()),
+                  _buildNavigationButton(
+                      context, Icons.delete, "Delete", DeleteFeedbackScreen()),
+                  _buildNavigationButton(
+                      context, Icons.list, "Read", ReadFeedbackScreen()),
+                ],
+              ),
             ),
-            const SizedBox(height: 30),
-            // Microphone icon at the bottom
-            _buildMicrophoneIcon(),
+            const Divider(),
+            // Microphone icon at the bottom (about 25% of the screen height)
+            Container(
+              height: screenHeight * 0.25,
+              child: Center(
+                child: _buildMicrophoneIcon(),
+              ),
+            ),
           ],
         ),
       ),
