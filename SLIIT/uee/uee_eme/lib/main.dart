@@ -169,7 +169,7 @@ class _SosScreenState extends State<SosScreen> {
                   Row(
                     children: [
                       Text(
-                        "Hi, Hasindu",
+                        "Hi, Hasindu !",
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
@@ -296,9 +296,8 @@ class CountdownScreen extends StatefulWidget {
 }
 
 class _CountdownScreenState extends State<CountdownScreen> {
-  int _counter = 3; // Starting value of the countdown
+  int _counter = 3;
   Timer? _timer;
-  bool _disposed = false;
 
   @override
   void initState() {
@@ -308,21 +307,19 @@ class _CountdownScreenState extends State<CountdownScreen> {
 
   @override
   void dispose() {
-    _disposed = true;
-    _timer
-        ?.cancel(); // Cancel the timer to prevent it from running after dispose
+    _timer?.cancel();
     super.dispose();
   }
 
   void _startCountdown() {
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) async {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_counter > 0 && mounted) {
         setState(() {
           _counter--;
         });
       } else {
         timer.cancel();
-        await _vibrateAndNavigate();
+        _vibrateAndNavigate();
       }
     });
   }
@@ -330,14 +327,9 @@ class _CountdownScreenState extends State<CountdownScreen> {
   Future<void> _vibrateAndNavigate() async {
     bool? hasVibrator = await Vibration.hasVibrator();
     if (hasVibrator ?? false) {
-      Vibration.vibrate(duration: 1000); // Vibrate for 1 second
+      Vibration.vibrate(duration: 1000);
     }
-    if (!_disposed && mounted) {
-      _navigateToEmergencyActive();
-    }
-  }
 
-  void _navigateToEmergencyActive() {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
@@ -347,8 +339,32 @@ class _CountdownScreenState extends State<CountdownScreen> {
   }
 
   void _cancelCountdown() {
-    _timer?.cancel(); // Cancel the countdown
-    Navigator.pop(context); // Return to the previous screen
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Cancel SOS?"),
+          content: const Text(
+              "Are you sure you want to cancel the emergency alert?"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                _timer?.cancel();
+                Navigator.pop(context); // Close dialog
+                Navigator.pop(context); // Go back to previous screen
+              },
+              child: const Text("Yes"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Close dialog without canceling
+              },
+              child: const Text("No"),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -358,34 +374,28 @@ class _CountdownScreenState extends State<CountdownScreen> {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Countdown Timer Display
           Text(
             _counter.toString(),
             style: const TextStyle(
-              fontSize: 100,
-              color: Colors.red,
-              fontWeight: FontWeight.bold,
-            ),
+                fontSize: 100, color: Colors.red, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 40),
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 20.0),
             child: Text(
-              "Sending location will start after count down, click cancel to exit",
+              "Location sharing will start after countdown. Click cancel to exit.",
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 16, color: Colors.black54),
             ),
           ),
           const SizedBox(height: 40),
-          // Cancel Button
           ElevatedButton(
             onPressed: _cancelCountdown,
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.redAccent,
               padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 40),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
+                  borderRadius: BorderRadius.circular(12)),
             ),
             child: const Text(
               "Cancel",
