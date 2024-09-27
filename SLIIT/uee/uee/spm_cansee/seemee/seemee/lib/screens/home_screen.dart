@@ -63,7 +63,7 @@ class _HomeScreenState extends State<HomeScreen> {
     } else if (command.contains("read feedbacks")) {
       _navigateToScreen(ReadFeedbackScreen());
     } else if (command.contains("edit feedbacks")) {
-      _navigateToScreen(UpdateFeedbackScreen());
+      _navigateToScreen(const UpdateFeedbackScreen());
     } else if (command.contains("delete feedbacks")) {
       _navigateToScreen(DeleteFeedbackScreen());
     } else {

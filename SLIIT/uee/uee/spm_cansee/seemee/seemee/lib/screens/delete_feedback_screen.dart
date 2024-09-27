@@ -5,6 +5,8 @@ import 'package:intl/intl.dart'; // For date formatting
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 class DeleteFeedbackScreen extends StatefulWidget {
+  const DeleteFeedbackScreen({super.key});
+
   @override
   _DeleteFeedbackScreenState createState() => _DeleteFeedbackScreenState();
 }

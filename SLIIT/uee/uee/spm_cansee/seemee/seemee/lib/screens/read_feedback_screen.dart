@@ -10,6 +10,8 @@ import 'update_feedback_screen.dart';
 import 'delete_feedback_screen.dart';
 
 class ReadFeedbackScreen extends StatefulWidget {
+  const ReadFeedbackScreen({super.key});
+
   @override
   _ReadFeedbackScreenState createState() => _ReadFeedbackScreenState();
 }
@@ -52,7 +54,7 @@ class _ReadFeedbackScreenState extends State<ReadFeedbackScreen> {
   String _generateTitle(String feedbackText) {
     // Take the first 20 characters or less to create a dynamic title
     return feedbackText.length > 20
-        ? feedbackText.substring(0, 20) + "..."
+        ? "${feedbackText.substring(0, 20)}..."
         : feedbackText;
   }
 

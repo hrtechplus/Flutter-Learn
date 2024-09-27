@@ -7,6 +7,8 @@ import 'package:flutter/services.dart'; // For haptic feedback
 import 'package:vibration/vibration.dart'; // Vibration package
 
 class CreateFeedbackScreen extends StatefulWidget {
+  const CreateFeedbackScreen({super.key});
+
   @override
   _CreateFeedbackScreenState createState() => _CreateFeedbackScreenState();
 }
@@ -49,7 +51,8 @@ class _CreateFeedbackScreenState extends State<CreateFeedbackScreen> {
 
   // Speak the prompt when the page appears
   void _speakPrompt() async {
-    await flutterTts.speak("You can record your voice feedback now");
+    await flutterTts.speak(
+        "You are in the Feedback menu. Tap the left bottom of the screen to start recording, and touch the right side to send feedback.");
   }
 
   // Start vibration and haptic feedback when recording starts
@@ -78,8 +81,8 @@ class _CreateFeedbackScreenState extends State<CreateFeedbackScreen> {
             _feedbackController.text = result.recognizedWords;
           });
         },
-        listenFor: Duration(seconds: 10),
-        pauseFor: Duration(seconds: 5),
+        listenFor: const Duration(seconds: 10),
+        pauseFor: const Duration(seconds: 5),
         partialResults: true,
       );
     }
@@ -95,6 +98,23 @@ class _CreateFeedbackScreenState extends State<CreateFeedbackScreen> {
 
       HapticFeedback
           .lightImpact(); // Provide light haptic feedback when stopping
+    }
+  }
+
+  // Custom vibration for success feedback
+  void _vibrateSuccess() async {
+    HapticFeedback.heavyImpact();
+    if (await Vibration.hasVibrator() ?? false) {
+      Vibration.vibrate(duration: 300); // Short single vibration for success
+    }
+  }
+
+  // Custom vibration for error feedback
+  void _vibrateError() async {
+    HapticFeedback.heavyImpact();
+    if (await Vibration.hasVibrator() ?? false) {
+      Vibration.vibrate(
+          pattern: [0, 200, 100, 200]); // Double vibration for error
     }
   }
 
@@ -119,6 +139,11 @@ class _CreateFeedbackScreenState extends State<CreateFeedbackScreen> {
           'dateTime': formattedDateTime, // Human-readable date/time
         });
 
+        _vibrateSuccess(); // Vibration feedback for success
+
+        // Provide TTS feedback for success
+        await flutterTts.speak("Feedback sent successfully.");
+
         // Debugging print statement to verify saving process
         print("Feedback saved: $feedbackText on $formattedDateTime");
 
@@ -130,6 +155,11 @@ class _CreateFeedbackScreenState extends State<CreateFeedbackScreen> {
         // Clear the text field after saving
         _feedbackController.clear();
       } else {
+        _vibrateError(); // Vibration feedback for error
+
+        // Provide TTS feedback for empty feedback
+        await flutterTts.speak("Feedback text cannot be empty.");
+
         // Show error message if the text field is empty
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Feedback text cannot be empty!')),
@@ -137,6 +167,11 @@ class _CreateFeedbackScreenState extends State<CreateFeedbackScreen> {
       }
     } catch (e) {
       // Handle errors
+      _vibrateError(); // Vibration feedback for error
+
+      // Provide TTS feedback for failure
+      await flutterTts.speak("Failed to send feedback.");
+
       print("Error saving feedback: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to save feedback: $e')),
@@ -194,7 +229,7 @@ class _CreateFeedbackScreenState extends State<CreateFeedbackScreen> {
                         borderRadius:
                             BorderRadius.circular(20), // Rounded edges
                       ),
-                      child: Column(
+                      child: const Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
@@ -202,8 +237,8 @@ class _CreateFeedbackScreenState extends State<CreateFeedbackScreen> {
                             size: 60, // Larger icon for accessibility
                             color: Colors.redAccent,
                           ),
-                          const SizedBox(height: 10),
-                          const Text(
+                          SizedBox(height: 10),
+                          Text(
                             "Record Feedback",
                             style: TextStyle(fontSize: 18),
                           )
@@ -224,7 +259,7 @@ class _CreateFeedbackScreenState extends State<CreateFeedbackScreen> {
                         borderRadius:
                             BorderRadius.circular(20), // Rounded edges
                       ),
-                      child: Column(
+                      child: const Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
@@ -232,8 +267,8 @@ class _CreateFeedbackScreenState extends State<CreateFeedbackScreen> {
                             size: 60, // Larger icon for accessibility
                             color: Colors.redAccent,
                           ),
-                          const SizedBox(height: 10),
-                          const Text(
+                          SizedBox(height: 10),
+                          Text(
                             "Send Feedback",
                             style: TextStyle(fontSize: 18),
                           )
