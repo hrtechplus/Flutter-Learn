@@ -1,9 +1,16 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'dart:async'; // For using Timer
 import 'package:geolocator/geolocator.dart';
 import 'package:vibration/vibration.dart'; // Import the vibration package
+import 'package:cloud_firestore/cloud_firestore.dart'; // Firestore package
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Firebase
+  await Firebase.initializeApp();
+
   runApp(const MyApp());
 }
 
@@ -500,8 +507,39 @@ class ChatScreen extends StatelessWidget {
 // Profile Screen (medical form)
 class ProfileScreen extends StatelessWidget {
   final _formKey = GlobalKey<FormState>();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _ageController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _bloodGroupController = TextEditingController();
+  final TextEditingController _allergiesController = TextEditingController();
 
   ProfileScreen({super.key});
+
+  Future<void> _saveProfile(BuildContext context) async {
+    if (_formKey.currentState!.validate()) {
+      // Saving the profile data to Firestore
+      try {
+        await FirebaseFirestore.instance.collection('profiles').add({
+          'name': _nameController.text,
+          'age': _ageController.text,
+          'phone': _phoneController.text,
+          'bloodGroup': _bloodGroupController.text,
+          'allergies': _allergiesController.text,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+
+        // Show success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Profile saved successfully!')),
+        );
+      } catch (e) {
+        // Handle Firestore save error
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error saving profile: $e')),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -514,7 +552,7 @@ class ProfileScreen extends StatelessWidget {
           onPressed: () {},
         ),
         title: const Text(
-          "Hello,Hasindu",
+          "Hello, Hasindu",
           style: TextStyle(color: Colors.black),
         ),
         centerTitle: true,
@@ -535,31 +573,37 @@ class ProfileScreen extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               const Text(
-                "To keep you safe we get those",
+                "To keep you safe we need this information !",
                 style: TextStyle(
                   fontSize: 14,
                   color: Colors.black54,
                 ),
               ),
               const SizedBox(height: 20),
-              buildTextFormField("Name", "Enter your name"),
+              buildTextFormField("Name", "Enter your name", _nameController),
               const SizedBox(height: 20),
-              buildTextFormField("Age", "Enter your age",
-                  keyboardType: TextInputType.number),
+              buildTextFormField(
+                "Age",
+                "Enter your age",
+                _ageController,
+                keyboardType: TextInputType.number,
+              ),
               const SizedBox(height: 20),
-              buildTextFormField("Phone Number", "Enter your phone number",
-                  keyboardType: TextInputType.phone),
+              buildTextFormField(
+                "Phone Number",
+                "Enter your phone number",
+                _phoneController,
+                keyboardType: TextInputType.phone,
+              ),
               const SizedBox(height: 20),
-              buildTextFormField("Blood Group", "Enter your blood group"),
+              buildTextFormField("Blood Group", "Enter your blood group",
+                  _bloodGroupController),
               const SizedBox(height: 20),
-              buildTextFormField("Allergies", "Enter your allergies"),
+              buildTextFormField(
+                  "Allergies", "Enter your allergies", _allergiesController),
               const SizedBox(height: 40),
               ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    // Process data
-                  }
-                },
+                onPressed: () => _saveProfile(context),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.redAccent,
                   padding: const EdgeInsets.symmetric(vertical: 16),
@@ -583,10 +627,12 @@ class ProfileScreen extends StatelessWidget {
   }
 
   // Custom Method to Build TextFormField Widgets
-  Widget buildTextFormField(String label, String hint,
+  Widget buildTextFormField(
+      String label, String hint, TextEditingController controller,
       {bool obscureText = false,
       TextInputType keyboardType = TextInputType.text}) {
     return TextFormField(
+      controller: controller,
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,

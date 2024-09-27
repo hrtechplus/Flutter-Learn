@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "689778795663",
+    "firebase_url": "https://uee-health-default-rtdb.firebaseio.com",
     "project_id": "uee-health",
     "storage_bucket": "uee-health.appspot.com"
   },
