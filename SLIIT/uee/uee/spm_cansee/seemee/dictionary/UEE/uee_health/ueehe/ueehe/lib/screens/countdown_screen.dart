@@ -1,19 +1,25 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'confirmation_screen.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class CountdownScreen extends StatefulWidget {
   final String location;
+  final double latitude;
+  final double longitude;
 
-  const CountdownScreen({super.key, required this.location});
+  const CountdownScreen({
+    super.key,
+    required this.location,
+    required this.latitude,
+    required this.longitude,
+  });
 
   @override
   _CountdownScreenState createState() => _CountdownScreenState();
 }
 
 class _CountdownScreenState extends State<CountdownScreen> {
-  int _counter = 3;
+  int _counter = 3; // Countdown starts at 3 seconds
   Timer? _timer;
 
   @override
@@ -30,30 +36,23 @@ class _CountdownScreenState extends State<CountdownScreen> {
         });
       } else {
         timer.cancel();
-        _onCountdownFinished();
+        _onCountdownFinished(); // Call navigation method when the countdown finishes
       }
     });
   }
 
   void _onCountdownFinished() {
-    String message =
-        "SOS Emergency! I need help. My current location is: ${widget.location}";
-    _sendSMS(message);
+    // Ensure navigation to ConfirmationScreen with the necessary arguments
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => ConfirmationScreen(location: widget.location),
+        builder: (context) => ConfirmationScreen(
+          location: widget.location,
+          latitude: widget.latitude,
+          longitude: widget.longitude,
+        ),
       ),
     );
-  }
-
-  void _sendSMS(String message) async {
-    String smsUrl = "sms:+1234567890?body=$message"; // Replace with actual number
-    if (await canLaunch(smsUrl)) {
-      await launch(smsUrl);
-    } else {
-      throw 'Could not launch SMS';
-    }
   }
 
   @override
@@ -66,14 +65,107 @@ class _CountdownScreenState extends State<CountdownScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Center(
-        child: Text(
-          '$_counter',
-          style: const TextStyle(
-            fontSize: 100,
-            color: Colors.redAccent,
-            fontWeight: FontWeight.bold,
-          ),
+      body: SafeArea(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Top Bar
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                    icon:
+                        const Icon(Icons.menu, size: 28, color: Colors.black54),
+                    onPressed: () {},
+                  ),
+                  const Text(
+                    "Hello, Hasindu",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Spacer(),
+
+            // Countdown Timer Circle
+            Container(
+              height: 200,
+              width: 200,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.redAccent, width: 8),
+              ),
+              child: Center(
+                child: Text(
+                  '$_counter',
+                  style: const TextStyle(
+                    fontSize: 80,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.redAccent,
+                  ),
+                ),
+              ),
+            ),
+
+            const Spacer(),
+
+            // Informative text and Cancel button
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+              decoration: const BoxDecoration(
+                color: Colors.redAccent,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
+                ),
+              ),
+              child: Column(
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Text(
+                      "Sending location will start after countdown. Click cancel to exit.",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context); // Cancel action
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 16, horizontal: 32),
+                    ),
+                    child: const Text(
+                      "Cancel",
+                      style: TextStyle(
+                        color: Colors.redAccent,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );

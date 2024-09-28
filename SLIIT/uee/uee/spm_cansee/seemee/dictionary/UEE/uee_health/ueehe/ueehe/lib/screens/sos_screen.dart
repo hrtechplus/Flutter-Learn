@@ -13,6 +13,8 @@ class SosScreen extends StatefulWidget {
 
 class _SosScreenState extends State<SosScreen> {
   String _currentLocation = "Fetching location...";
+  double? _latitude;
+  double? _longitude;
 
   @override
   void initState() {
@@ -58,15 +60,29 @@ class _SosScreenState extends State<SosScreen> {
     Position position = await Geolocator.getCurrentPosition();
     setState(() {
       _currentLocation = "${position.latitude}, ${position.longitude}";
+      _latitude = position.latitude;
+      _longitude = position.longitude;
     });
   }
 
   void _startEmergencyProcedure() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-          builder: (context) => CountdownScreen(location: _currentLocation)),
-    );
+    if (_latitude != null && _longitude != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => CountdownScreen(
+            location: _currentLocation,
+            latitude: _latitude!,
+            longitude: _longitude!,
+          ),
+        ),
+      );
+    } else {
+      // Handle the case where the location is not available
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Unable to fetch location")),
+      );
+    }
   }
 
   @override
