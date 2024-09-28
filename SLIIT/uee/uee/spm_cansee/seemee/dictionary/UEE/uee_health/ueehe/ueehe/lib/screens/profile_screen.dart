@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -10,6 +11,7 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final _formKey = GlobalKey<FormState>();
 
+  // Controllers for each input field
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _ageController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
@@ -30,6 +32,41 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String? _selectedBloodGroup; // Holds the selected blood type
 
   @override
+  void initState() {
+    super.initState();
+    _loadProfileData(); // Load the saved profile data on screen load
+  }
+
+  // Load saved profile data from SharedPreferences
+  Future<void> _loadProfileData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _nameController.text = prefs.getString('name') ?? '';
+      _ageController.text = prefs.getString('age') ?? '';
+      _phoneController.text = prefs.getString('phone') ?? '';
+      _selectedBloodGroup = prefs.getString('blood_group');
+      _allergiesController.text = prefs.getString('allergies') ?? '';
+    });
+  }
+
+  // Save profile data to SharedPreferences
+  Future<void> _saveProfileData() async {
+    if (_formKey.currentState!.validate()) {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('name', _nameController.text);
+      await prefs.setString('age', _ageController.text);
+      await prefs.setString('phone', _phoneController.text);
+      await prefs.setString('blood_group', _selectedBloodGroup ?? '');
+      await prefs.setString('allergies', _allergiesController.text);
+
+      // Show a success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Profile saved successfully!')),
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
@@ -38,7 +75,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // App Bar
+              // App Bar with Edit icon
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -54,6 +91,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       fontWeight: FontWeight.w500,
                       color: Colors.black87,
                     ),
+                  ),
+                  IconButton(
+                    icon:
+                        const Icon(Icons.edit, size: 28, color: Colors.black54),
+                    onPressed: () {
+                      // Optional: Add edit functionality, or it can be handled within the form itself
+                    },
                   ),
                 ],
               ),
@@ -166,22 +210,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             "Allergies (Additional Notes)"),
                         maxLines: 3,
                         validator: (value) {
-                          return null; // Allergies can be optional
+                          return null; // Allergies are optional
                         },
                       ),
                       const SizedBox(height: 40),
 
                       // Save Button
                       ElevatedButton(
-                        onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-                            // Handle form submission, e.g., save profile data
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text('Profile saved successfully!')),
-                            );
-                          }
-                        },
+                        onPressed: _saveProfileData, // Save the profile data
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.redAccent,
                           padding: const EdgeInsets.symmetric(vertical: 16),

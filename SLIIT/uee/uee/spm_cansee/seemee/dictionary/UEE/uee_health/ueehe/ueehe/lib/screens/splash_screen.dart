@@ -25,7 +25,7 @@ class SplashScreen extends StatelessWidget {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     if (prefs.containsKey('fullName')) {
       // Navigate to home screen if info exists
-      Navigator.pushReplacementNamed(context, '/home');
+      Navigator.pushReplacementNamed(context, '/sos');
     } else {
       // Navigate to welcome screen if no user info is found
       Navigator.pushReplacementNamed(context, '/welcome');

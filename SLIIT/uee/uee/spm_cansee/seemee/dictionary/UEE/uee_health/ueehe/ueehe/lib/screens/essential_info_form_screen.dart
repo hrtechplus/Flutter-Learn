@@ -28,37 +28,77 @@ class _EssentialInfoFormScreenState extends State<EssentialInfoFormScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Essential Information")),
+      appBar: AppBar(
+        automaticallyImplyLeading: false, // Disable default back button
+        title: const SizedBox.shrink(), // No title in the app bar
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pushReplacementNamed(
+                  context, '/sos'); // Navigate to SOS screen
+            },
+            child: const Text(
+              'Skip',
+              style: TextStyle(color: Colors.redAccent, fontSize: 16),
+            ),
+          ),
+        ],
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: Form(
           key: _formKey,
-          child: ListView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Progress Bar
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      height: 4,
+                      color: Colors.redAccent,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Container(
+                      height: 4,
+                      color: Colors.grey[300],
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 30),
+
+              // Health Information Title
+              const Text(
+                "Health Information",
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
               // Full Name Field
-              TextFormField(
+              _buildTextField(
                 controller: _nameController,
-                decoration: _buildInputDecoration("Full Name"),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your full name';
-                  }
-                  return null;
-                },
+                label: 'Full Name',
+                hint: 'Enter your full name',
               ),
               const SizedBox(height: 16),
 
               // Age Field
-              TextFormField(
+              _buildTextField(
                 controller: _ageController,
-                decoration: _buildInputDecoration("Age"),
+                label: 'Age',
+                hint: 'Enter your age',
                 keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your age';
-                  }
-                  return null;
-                },
               ),
               const SizedBox(height: 16),
 
@@ -87,19 +127,14 @@ class _EssentialInfoFormScreenState extends State<EssentialInfoFormScreen> {
               const SizedBox(height: 16),
 
               // Emergency Contact Field
-              TextFormField(
+              _buildTextField(
                 controller: _emergencyContactController,
-                decoration: _buildInputDecoration("Emergency Contact"),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter an emergency contact';
-                  }
-                  return null;
-                },
+                label: 'Emergency Contact',
+                hint: 'Enter emergency contact',
               ),
               const SizedBox(height: 30),
 
-              // Submit Button
+              // Next Button
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
@@ -107,16 +142,23 @@ class _EssentialInfoFormScreenState extends State<EssentialInfoFormScreen> {
                   }
                 },
                 style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.redAccent,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
+                  minimumSize:
+                      const Size(double.infinity, 50), // Full-width button
                 ),
                 child: const Text(
-                  'Submit',
-                  style: TextStyle(fontSize: 18, color: Colors.white),
+                  'Next',
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Colors.white,
+                  ),
                 ),
               ),
+              const SizedBox(height: 20),
             ],
           ),
         ),
@@ -124,6 +166,40 @@ class _EssentialInfoFormScreenState extends State<EssentialInfoFormScreen> {
     );
   }
 
+  // Reusable TextField Widget
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required String hint,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        hintText: hint,
+        filled: true,
+        fillColor: Colors.grey[100],
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.0),
+          borderSide: BorderSide.none,
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 18.0,
+          horizontal: 16.0,
+        ),
+      ),
+      keyboardType: keyboardType,
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter $label';
+        }
+        return null;
+      },
+    );
+  }
+
+  // Input decoration helper
   InputDecoration _buildInputDecoration(String label) {
     return InputDecoration(
       labelText: label,
@@ -131,6 +207,7 @@ class _EssentialInfoFormScreenState extends State<EssentialInfoFormScreen> {
       fillColor: Colors.grey[200],
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12.0),
+        borderSide: BorderSide.none,
       ),
     );
   }
@@ -148,7 +225,7 @@ class _EssentialInfoFormScreenState extends State<EssentialInfoFormScreen> {
       const SnackBar(content: Text('Profile created successfully!')),
     );
 
-    // Navigate to Home Screen (SOS screen)
-    Navigator.pushReplacementNamed(context, '/home');
+    // Navigate to SOS Screen
+    Navigator.pushReplacementNamed(context, '/sos');
   }
 }

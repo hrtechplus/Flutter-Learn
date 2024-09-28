@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'routes/app_routes.dart';
+import 'screens/main_app_screen.dart'; // New main screen with bottom navigation
 
 void main() {
   runApp(const MyApp());
