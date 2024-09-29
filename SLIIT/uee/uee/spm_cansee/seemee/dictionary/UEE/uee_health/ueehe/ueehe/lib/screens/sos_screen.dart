@@ -14,7 +14,8 @@ class SosScreen extends StatefulWidget {
   _SosScreenState createState() => _SosScreenState();
 }
 
-class _SosScreenState extends State<SosScreen> {
+class _SosScreenState extends State<SosScreen>
+    with SingleTickerProviderStateMixin {
   String _currentLocation = "Fetching location...";
   double? _latitude;
   double? _longitude;
@@ -24,21 +25,44 @@ class _SosScreenState extends State<SosScreen> {
   // List of screens for each tab
   final List<Widget> _screens = [];
 
+  late AnimationController
+      _controller; // Controller for the breathing animation
+  late Animation<double> _animation; // Animation value for scaling
+
   @override
   void initState() {
     super.initState();
-    _screens.add(SosHomeScreen(
+
+    // Initialize the screens for bottom navigation
+    _screens.add(SosScreenContent(
       location: _currentLocation,
       onEmergencyPressed: _startEmergencyProcedure,
-    )); // SOS Home Screen (First Tab)
+    ));
     _screens.add(HistoryScreen()); // History Screen (Second Tab)
     _screens.add(ProfileScreen()); // Profile Screen (Third Tab)
+
     _requestPermissions();
+
+    // Initialize the animation controller
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 1), // Duration for one breathing cycle
+    )..repeat(reverse: true); // Repeat the animation (breathing effect)
+
+    // Tween to scale between 0.9x and 1.0x
+    _animation = Tween<double>(begin: 0.9, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose(); // Dispose the animation controller
+    super.dispose();
   }
 
   Future<void> _requestPermissions() async {
     var locationPermission = await Permission.location.request();
-
     if (locationPermission.isGranted) {
       _determinePosition();
     } else {
@@ -57,8 +81,8 @@ class _SosScreenState extends State<SosScreen> {
         _currentLocation = "${position.latitude}, ${position.longitude}";
         _latitude = position.latitude;
         _longitude = position.longitude;
-        // Update the SosHomeScreen with the new location
-        _screens[0] = SosHomeScreen(
+        // Update the SosScreenContent with the new location
+        _screens[0] = SosScreenContent(
           location: _currentLocation,
           onEmergencyPressed: _startEmergencyProcedure,
         );
@@ -112,12 +136,45 @@ class _SosScreenState extends State<SosScreen> {
   }
 }
 
-// SosHomeScreen widget remains the same
-class SosHomeScreen extends StatelessWidget {
+// SosScreenContent widget with pulsing animation for SOS button
+class SosScreenContent extends StatefulWidget {
   final VoidCallback onEmergencyPressed;
   final String location;
 
-  SosHomeScreen({required this.onEmergencyPressed, required this.location});
+  SosScreenContent({required this.onEmergencyPressed, required this.location});
+
+  @override
+  _SosScreenContentState createState() => _SosScreenContentState();
+}
+
+class _SosScreenContentState extends State<SosScreenContent>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Initialize the animation controller
+    _controller = AnimationController(
+      vsync: this, // Ticker provider for the animation
+      duration: const Duration(seconds: 1), // Duration for one breathing cycle
+    )..repeat(
+        reverse:
+            true); // Repeat the animation in reverse for the breathing effect
+
+    // Define the animation tween (scale between 0.9 and 1.0)
+    _animation = Tween<double>(begin: 0.9, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose(); // Dispose the controller when the widget is removed
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -171,37 +228,46 @@ class SosHomeScreen extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 40),
+        // Breathing SOS button with animation
         GestureDetector(
-          onLongPress: onEmergencyPressed,
-          child: Container(
-            height: 200,
-            width: 200,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: const LinearGradient(
-                colors: [Colors.redAccent, Colors.red],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.redAccent.withOpacity(0.5),
-                  spreadRadius: 5,
-                  blurRadius: 10,
-                  offset: const Offset(0, 3),
+          onLongPress: widget.onEmergencyPressed,
+          child: AnimatedBuilder(
+            animation: _controller,
+            builder: (context, child) {
+              return Transform.scale(
+                scale: _animation.value, // Apply the scaling from animation
+                child: Container(
+                  height: 200,
+                  width: 200,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: const LinearGradient(
+                      colors: [Colors.redAccent, Colors.red],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.redAccent.withOpacity(0.5),
+                        spreadRadius: 5,
+                        blurRadius: 10,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: const Center(
+                    child: Text(
+                      "SOS",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
                 ),
-              ],
-            ),
-            child: const Center(
-              child: Text(
-                "SOS",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
+              );
+            },
           ),
         ),
         const SizedBox(height: 40),
@@ -230,7 +296,7 @@ class SosHomeScreen extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      location,
+                      widget.location,
                       style: const TextStyle(
                         fontSize: 14,
                         color: Colors.black54,
