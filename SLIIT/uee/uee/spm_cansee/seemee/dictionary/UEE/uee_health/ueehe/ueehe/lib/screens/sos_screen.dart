@@ -219,7 +219,7 @@ class _SosScreenContentState extends State<SosScreenContent>
         const Padding(
           padding: EdgeInsets.symmetric(horizontal: 40.0),
           child: Text(
-            "Hold the SOS button for a while, the urgent situation will start soon.",
+            "Hold the SOS button for a while, the urgent situation will start soo.",
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 14,
