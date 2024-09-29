@@ -1,174 +1,218 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:io';
-import 'edit_profile_screen.dart'; // Import the Edit Profile Screen
 
 class ProfileScreen extends StatefulWidget {
+  const ProfileScreen({super.key});
+
   @override
   _ProfileScreenState createState() => _ProfileScreenState();
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  String fullName = 'Loading...';
-  String birthDate = 'Loading...';
-  String bloodType = 'Loading...';
-  String height = 'Loading...';
-  String weight = 'Loading...';
-  String address = 'Loading...';
-  String phoneNumber = 'Loading...';
-  String allergies = 'Loading...';
-  String? profileImagePath;
+  String? _name = "Hasindu Rangika";
+  String? _birthdate = "Tue, May 29 2001 (23 Years)";
+  String? _bloodType = "B+";
+  String? _height = "165cm";
+  String? _weight = "55Kg";
+  String? _address = "Minuwangoda, Sri Lanka";
+  String? _phoneNumber = "071 0840 270";
+  String? _gender = "Male";
+  String? _allergies = "None";
 
   @override
   void initState() {
     super.initState();
-    _loadProfileData();
+    _loadProfileData(); // Load the saved profile data from SharedPreferences
   }
 
-  // Load profile data from SharedPreferences
   Future<void> _loadProfileData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      fullName = prefs.getString('name') ?? 'N/A';
-      birthDate = prefs.getString('birthday') ?? 'N/A';
-      bloodType = prefs.getString('blood_group') ?? 'N/A';
-      height = prefs.getString('height') ?? 'N/A';
-      weight = prefs.getString('weight') ?? 'N/A';
-      address = prefs.getString('address') ?? 'N/A';
-      phoneNumber = prefs.getString('phone') ?? 'N/A';
-      allergies = prefs.getString('allergies') ?? 'N/A';
-      profileImagePath = prefs.getString('profile_image');
+      _name = prefs.getString('name') ?? _name;
+      _birthdate = prefs.getString('birthdate') ?? _birthdate;
+      _bloodType = prefs.getString('blood_group') ?? _bloodType;
+      _height = prefs.getString('height') ?? _height;
+      _weight = prefs.getString('weight') ?? _weight;
+      _address = prefs.getString('address') ?? _address;
+      _phoneNumber = prefs.getString('phone') ?? _phoneNumber;
+      _gender = prefs.getString('gender') ?? _gender;
+      _allergies = prefs.getString('allergies') ?? _allergies;
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
-        child: ListView(
-          children: [
-            const SizedBox(height: 20),
-            const Text(
-              'Health Profile',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            const Text('To keep you safe we get those',
-                style: TextStyle(color: Colors.black54)),
-            const SizedBox(height: 20),
-
-            // Profile picture and user info
-            Center(
-              child: Column(
-                children: [
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundImage: profileImagePath != null
-                        ? FileImage(File(profileImagePath!))
-                        : null,
-                    child: profileImagePath == null
-                        ? const Icon(Icons.person,
-                            size: 60, color: Colors.white)
-                        : null,
-                    backgroundColor: Colors.grey,
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    fullName,
-                    style: const TextStyle(
-                        fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    birthDate,
-                    style: const TextStyle(color: Colors.black54),
-                  ),
-                ],
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: ListView(
+            children: [
+              const SizedBox(height: 2),
+              // Health Profile Section
+              const Text(
+                "Health Profile",
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
+              const SizedBox(height: 1),
+              const Text(
+                "To keep you safe we get those",
+                style: TextStyle(color: Colors.black54),
+              ),
+              const SizedBox(height: 16),
+              const SizedBox(height: 20),
+              // Profile Image
+              Center(
+                child: CircleAvatar(
+                  radius: 50,
+                  backgroundColor: Colors.grey[300],
+                  child: const Icon(
+                    Icons.person,
+                    size: 50,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
 
-            // Blood Type, Height, Weight
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildInfoColumn('Blood Type', bloodType),
-                _buildInfoColumn('Height', '$height cm'),
-                _buildInfoColumn('Weight', '$weight kg'),
-              ],
-            ),
-            const SizedBox(height: 40),
-
-            // Extra Information
-            const Text(
-              'Extra Information',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            _buildInfoRow('Address', address),
-            const SizedBox(height: 10),
-            _buildInfoRow('Phone number', phoneNumber),
-            const SizedBox(height: 10),
-            _buildInfoRow('Allergies', allergies),
-
-            const SizedBox(height: 20),
-
-            // Edit button
-            Align(
-              alignment: Alignment.bottomRight,
-              child: FloatingActionButton(
-                backgroundColor: Colors.redAccent,
-                onPressed: () {
-                  // Navigate to Edit Profile Screen
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => EditProfileScreen(
-                        profileImagePath: profileImagePath,
-                        fullName: fullName,
-                        birthDate: birthDate,
-                        phoneNumber: phoneNumber,
-                        bloodType: bloodType,
-                        allergies: allergies,
-                        height: height,
-                        weight: weight,
+              // Name and Birthdate
+              Center(
+                child: Column(
+                  children: [
+                    Text(
+                      _name ?? '',
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                  );
-                },
-                child: const Icon(Icons.edit, color: Colors.white),
+                    const SizedBox(height: 8),
+                    Text(
+                      _birthdate ?? '',
+                      style: const TextStyle(
+                        color: Colors.grey,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+              const SizedBox(height: 20),
+
+              // Blood Type, Height, Weight in a Row
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildHealthData("Blood Type", _bloodType ?? ''),
+                  _buildHealthData("Height", _height ?? ''),
+                  _buildHealthData("Weight", _weight ?? ''),
+                ],
+              ),
+              const SizedBox(height: 30),
+
+              // Extra Information Section
+              const Text(
+                "Extra Information",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Address, Phone, Gender
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: _buildExtraInfo(Icons.location_on, _address ?? ''),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: _buildExtraInfo(Icons.phone, _phoneNumber ?? ''),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: _buildExtraInfo(Icons.person, _gender ?? ''),
+              ),
+              const SizedBox(height: 30),
+              // General Information Section (Allergies)
+              const Text(
+                "General Information",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(16),
+                margin: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: BoxDecoration(
+                  color: Colors.grey[200],
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  _allergies ?? 'Allergies (Additional Notes)',
+                  style: const TextStyle(fontSize: 16),
+                ),
+              ),
+
+              const SizedBox(height: 30),
+            ],
+          ),
         ),
+      ),
+
+      // Floating Edit Button
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.redAccent,
+        onPressed: () {
+          Navigator.pushNamed(
+              context, '/editProfile'); // Navigate to edit screen
+        },
+        child: const Icon(Icons.edit),
       ),
     );
   }
 
-  // Helper methods for building UI elements
-  Column _buildInfoColumn(String label, String value) {
+  // Helper Widget for Health Profile data (Blood Type, Height, Weight)
+  Widget _buildHealthData(String title, String value) {
     return Column(
       children: [
-        Text(label,
-            style: const TextStyle(fontSize: 14, color: Colors.black54)),
-        const SizedBox(height: 5),
-        Text(value,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        Text(
+          title,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: const TextStyle(fontSize: 16),
+        ),
       ],
     );
   }
 
-  Row _buildInfoRow(String label, String value) {
-    return Row(
-      children: [
-        Text('$label: ',
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-        Expanded(
-          child: Text(value,
-              style: const TextStyle(color: Colors.black54, fontSize: 16),
-              overflow: TextOverflow.ellipsis),
-        ),
-      ],
+  // Helper Widget for Extra Information (Address, Phone, Gender)
+  Widget _buildExtraInfo(IconData icon, String info) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.redAccent),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              info,
+              style: const TextStyle(fontSize: 16),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
