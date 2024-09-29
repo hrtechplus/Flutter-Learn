@@ -146,6 +146,13 @@ class _CountdownScreenState extends State<CountdownScreen>
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
               decoration: const BoxDecoration(
+                boxShadow: const [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 10,
+                    offset: Offset(0, -10),
+                  ),
+                ],
                 color: Colors.redAccent,
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(20),
@@ -162,6 +169,7 @@ class _CountdownScreenState extends State<CountdownScreen>
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 14,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
@@ -176,7 +184,7 @@ class _CountdownScreenState extends State<CountdownScreen>
                         borderRadius: BorderRadius.circular(12),
                       ),
                       padding: const EdgeInsets.symmetric(
-                          vertical: 16, horizontal: 32),
+                          vertical: 8, horizontal: 64),
                     ),
                     child: const Text(
                       "Cancel",

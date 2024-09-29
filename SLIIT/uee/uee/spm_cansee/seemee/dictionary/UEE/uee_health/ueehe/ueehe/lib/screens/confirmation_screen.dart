@@ -189,6 +189,13 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
                   padding:
                       const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
                   decoration: const BoxDecoration(
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black26,
+                        blurRadius: 10,
+                        offset: Offset(0, -2),
+                      ),
+                    ],
                     color: Colors.redAccent,
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(20),
@@ -204,7 +211,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
                       ),
                       const SizedBox(height: 10),
                       const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 16.0),
+                        padding: EdgeInsets.symmetric(horizontal: 18.0),
                         child: Text(
                           "Don't panic! We have acknowledged them, your support is on the way.",
                           textAlign: TextAlign.center,
@@ -226,7 +233,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
                             borderRadius: BorderRadius.circular(12),
                           ),
                           padding: const EdgeInsets.symmetric(
-                              vertical: 16, horizontal: 32),
+                              vertical: 10, horizontal: 64),
                         ),
                         child: const Text(
                           "Cancel",
