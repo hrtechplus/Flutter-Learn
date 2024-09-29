@@ -271,13 +271,14 @@ class _SosScreenContentState extends State<SosScreenContent>
             },
           ),
         ),
-        const SizedBox(height: 40),
+        const SizedBox(height: 100),
         Container(
           margin: const EdgeInsets.symmetric(horizontal: 20),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
+            boxShadow: [BoxShadow(color: Colors.grey[300]!, blurRadius: 20)],
             color: Colors.grey[100],
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
           ),
           child: Row(
             children: [

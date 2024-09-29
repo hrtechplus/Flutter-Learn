@@ -168,7 +168,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       // Floating Edit Button
       floatingActionButton: FloatingActionButton(
+        shape: const CircleBorder(),
         backgroundColor: Colors.redAccent,
+        foregroundColor: Colors.white,
         onPressed: () {
           Navigator.pushNamed(
               context, '/editProfile'); // Navigate to edit screen
