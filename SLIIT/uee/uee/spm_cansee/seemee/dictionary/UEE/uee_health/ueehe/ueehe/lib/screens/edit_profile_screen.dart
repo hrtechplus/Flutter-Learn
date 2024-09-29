@@ -4,27 +4,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
 
 class EditProfileScreen extends StatefulWidget {
-  final String? profileImagePath;
-  final String fullName;
-  final String birthDate;
-  final String phoneNumber;
-  final String bloodType;
-  final String allergies;
-  final String height;
-  final String weight;
-
-  const EditProfileScreen({
-    super.key,
-    required this.profileImagePath,
-    required this.fullName,
-    required this.birthDate,
-    required this.phoneNumber,
-    required this.bloodType,
-    required this.allergies,
-    required this.height,
-    required this.weight,
-  });
-
   @override
   _EditProfileScreenState createState() => _EditProfileScreenState();
 }
@@ -32,17 +11,16 @@ class EditProfileScreen extends StatefulWidget {
 class _EditProfileScreenState extends State<EditProfileScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  // Controllers for form fields
   final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _addressController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _allergiesController = TextEditingController();
   final TextEditingController _heightController = TextEditingController();
   final TextEditingController _weightController = TextEditingController();
   final TextEditingController _birthdayController = TextEditingController();
-  String? _selectedBloodGroup;
-  File? _profileImage;
+  final TextEditingController _addressController = TextEditingController();
 
+  File? _profileImage;
+  String? _selectedBloodGroup;
   final List<String> _bloodGroups = [
     'A+',
     'A-',
@@ -57,16 +35,23 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   void initState() {
     super.initState();
-    _nameController.text = widget.fullName;
-    _addressController.text = 'Enter address here'; // Default address
-    _phoneController.text = widget.phoneNumber;
-    _allergiesController.text = widget.allergies;
-    _heightController.text = widget.height;
-    _weightController.text = widget.weight;
-    _birthdayController.text = widget.birthDate;
-    _selectedBloodGroup = widget.bloodType;
-    _profileImage =
-        widget.profileImagePath != null ? File(widget.profileImagePath!) : null;
+    _loadProfileData(); // Load the saved profile data from SharedPreferences
+  }
+
+  // Load saved profile data from SharedPreferences
+  Future<void> _loadProfileData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _nameController.text = prefs.getString('name') ?? '';
+      _phoneController.text = prefs.getString('phone') ?? '';
+      _allergiesController.text = prefs.getString('allergies') ?? '';
+      _heightController.text = prefs.getString('height') ?? '';
+      _weightController.text = prefs.getString('weight') ?? '';
+      _birthdayController.text = prefs.getString('birthdate') ?? '';
+      _addressController.text = prefs.getString('address') ?? '';
+      _selectedBloodGroup =
+          prefs.getString('blood_group') ?? _bloodGroups.first;
+    });
   }
 
   // Pick image from gallery
@@ -84,13 +69,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Future<void> _saveProfileData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('name', _nameController.text);
-    await prefs.setString('address', _addressController.text);
     await prefs.setString('phone', _phoneController.text);
     await prefs.setString('blood_group', _selectedBloodGroup ?? '');
     await prefs.setString('allergies', _allergiesController.text);
     await prefs.setString('height', _heightController.text);
     await prefs.setString('weight', _weightController.text);
-    await prefs.setString('birthday', _birthdayController.text);
+    await prefs.setString('birthdate', _birthdayController.text);
+    await prefs.setString('address', _addressController.text);
+
     if (_profileImage != null) {
       await prefs.setString('profile_image', _profileImage!.path);
     }
@@ -148,27 +134,23 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Address
+              // Address Field
               _buildTextField(_addressController, 'Address'),
               const SizedBox(height: 16),
 
               // Phone Number and Blood Group in one row
               Row(
                 children: [
-                  // Phone Number Field
                   Expanded(
-                    child: _buildTextField(_phoneController, 'Phone Number'),
-                  ),
+                      child: _buildTextField(_phoneController, 'Phone Number')),
                   const SizedBox(width: 16),
-
-                  // Blood Group Dropdown
                   Expanded(
                     child: DropdownButtonFormField<String>(
                       decoration: _buildInputDecoration('Blood Group'),
                       value: _selectedBloodGroup,
                       onChanged: (newValue) {
                         setState(() {
-                          _selectedBloodGroup = newValue;
+                          _selectedBloodGroup = newValue!;
                         });
                       },
                       items: _bloodGroups.map((String bloodGroup) {
@@ -183,7 +165,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Allergies
+              // Allergies Field
               _buildTextField(
                   _allergiesController, 'Allergies (Additional Notes)'),
               const SizedBox(height: 16),
@@ -192,12 +174,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               Row(
                 children: [
                   Expanded(
-                    child: _buildTextField(_heightController, 'Height (cm)'),
-                  ),
+                      child: _buildTextField(_heightController, 'Height (cm)')),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: _buildTextField(_weightController, 'Weight (Kg)'),
-                  ),
+                      child: _buildTextField(_weightController, 'Weight (Kg)')),
                 ],
               ),
               const SizedBox(height: 16),

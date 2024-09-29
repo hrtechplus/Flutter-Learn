@@ -43,26 +43,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text('Hello, $_name'),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.black54),
+        centerTitle: true,
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: ListView(
             children: [
-              const SizedBox(height: 2),
-              // Health Profile Section
-              const Text(
-                "Health Profile",
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 1),
-              const Text(
-                "To keep you safe we get those",
-                style: TextStyle(color: Colors.black54),
-              ),
-              const SizedBox(height: 16),
               const SizedBox(height: 20),
               // Profile Image
               Center(
@@ -102,6 +94,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               const SizedBox(height: 20),
 
+              // Health Profile Section
+              const Text(
+                "Health Profile",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                "To keep you safe we get those",
+                style: TextStyle(color: Colors.black54),
+              ),
+              const SizedBox(height: 16),
+
               // Blood Type, Height, Weight in a Row
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -124,19 +131,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const SizedBox(height: 16),
 
               // Address, Phone, Gender
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: _buildExtraInfo(Icons.location_on, _address ?? ''),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: _buildExtraInfo(Icons.phone, _phoneNumber ?? ''),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: _buildExtraInfo(Icons.person, _gender ?? ''),
-              ),
+              _buildExtraInfo(Icons.location_on, _address ?? ''),
+              _buildExtraInfo(Icons.phone, _phoneNumber ?? ''),
+              _buildExtraInfo(Icons.person, _gender ?? ''),
               const SizedBox(height: 30),
+
               // General Information Section (Allergies)
               const Text(
                 "General Information",
@@ -148,7 +147,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const SizedBox(height: 16),
               Container(
                 padding: const EdgeInsets.all(16),
-                margin: const EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
                   color: Colors.grey[200],
                   borderRadius: BorderRadius.circular(12),
@@ -158,7 +156,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   style: const TextStyle(fontSize: 16),
                 ),
               ),
-
               const SizedBox(height: 30),
             ],
           ),
