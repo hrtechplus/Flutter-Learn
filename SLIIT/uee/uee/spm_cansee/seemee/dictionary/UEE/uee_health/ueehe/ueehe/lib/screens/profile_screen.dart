@@ -125,9 +125,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const SizedBox(height: 16),
 
               // Address, Phone, Gender
-              _buildExtraInfo(Icons.location_on, _address ?? ''),
-              _buildExtraInfo(Icons.phone, _phoneNumber ?? ''),
-              _buildExtraInfo(Icons.person, _gender ?? ''),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: _buildExtraInfo(Icons.location_on, _address ?? ''),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: _buildExtraInfo(Icons.phone, _phoneNumber ?? ''),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: _buildExtraInfo(Icons.person, _gender ?? ''),
+              ),
               const SizedBox(height: 30),
 
               // General Information Section (Allergies)
@@ -141,6 +150,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const SizedBox(height: 16),
               Container(
                 padding: const EdgeInsets.all(16),
+                margin: const EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
                   color: Colors.grey[200],
                   borderRadius: BorderRadius.circular(12),
