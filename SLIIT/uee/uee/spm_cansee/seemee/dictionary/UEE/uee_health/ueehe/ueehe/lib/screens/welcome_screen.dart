@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class WelcomeScreen extends StatelessWidget {
   @override
@@ -8,36 +9,19 @@ class WelcomeScreen extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Skip Button in the top-right corner
-              Align(
-                alignment: Alignment.topRight,
-                child: TextButton.icon(
-                  onPressed: () {
-                    // Navigate to SOS screen directly
-                    Navigator.pushReplacementNamed(context, '/sos');
-                  },
-                  icon: Icon(Icons.arrow_forward, color: Colors.redAccent),
-                  label: Text(
-                    'Skip',
-                    style: TextStyle(
-                      color: Colors.redAccent,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
+              const Spacer(),
+
+              // App Icon or Illustration (Center)
+              const Icon(
+                Icons.health_and_safety, // Replace with your app's logo
+                size: 150,
+                color: Colors.redAccent,
               ),
 
-              const Spacer(), // To push logo and text towards the center
-
-              // App Logo
-              Image.asset(
-                'assets/images/uee_logo.png', // Your logo path
-                height: 180, // Adjust the height based on your preference
-              ),
-              SizedBox(height: 40), // Spacing between logo and app name
+              const SizedBox(height: 30),
 
               // App Name
               const Text(
@@ -52,7 +36,7 @@ class WelcomeScreen extends StatelessWidget {
               // Tagline
               const SizedBox(height: 10),
               const Text(
-                "Your trusted partner in emergency,\nproviding immediate support.",
+                "Your trusted partner in emergencies, providing immediate support.",
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 16,
@@ -60,21 +44,25 @@ class WelcomeScreen extends StatelessWidget {
                 ),
               ),
 
-              const Spacer(), // Spacer to push button to the bottom
+              const Spacer(),
 
               // Get Started Button
               ElevatedButton(
-                onPressed: () {
-                  // Navigate to profile setup screen
-                  Navigator.pushReplacementNamed(context, '/profileSetup');
+                onPressed: () async {
+                  // Store that the user has seen the welcome screen
+                  SharedPreferences prefs =
+                      await SharedPreferences.getInstance();
+                  await prefs.setBool('hasSeenWelcome', true);
+
+                  // Navigate to the Essential Info Form screen
+                  Navigator.pushReplacementNamed(context, '/essentialForm');
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.redAccent, // Button color
                   padding:
                       const EdgeInsets.symmetric(horizontal: 60, vertical: 14),
                   shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(30), // Rounded button corners
+                    borderRadius: BorderRadius.circular(30),
                   ),
                 ),
                 child: const Text(
@@ -85,24 +73,32 @@ class WelcomeScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(
-                  height: 10), // Spacing between button and sign-in text
 
-              // Existing User? Sign in
+              const SizedBox(height: 20),
+
+              // Skip Button (Skip profile creation and go to SOS screen)
               GestureDetector(
-                onTap: () {
-                  // Add your sign-in functionality here
+                onTap: () async {
+                  // Store that the user has seen the welcome screen and skipped profile creation
+                  SharedPreferences prefs =
+                      await SharedPreferences.getInstance();
+                  await prefs.setBool('profileSkipped', true);
+                  await prefs.setBool('hasSeenWelcome', true);
+
+                  // Navigate to SOS screen
+                  Navigator.pushReplacementNamed(context, '/sos');
                 },
                 child: const Text(
-                  "Existing User?",
+                  "Skip",
                   style: TextStyle(
-                    color: Colors.black54,
+                    color: Colors.redAccent,
                     fontSize: 16,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ),
 
-              const SizedBox(height: 40), // Bottom padding
+              const SizedBox(height: 40),
             ],
           ),
         ),

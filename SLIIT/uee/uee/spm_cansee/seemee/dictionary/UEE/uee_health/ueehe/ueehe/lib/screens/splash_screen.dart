@@ -1,92 +1,68 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:ueehe/screens/sos_screen.dart';
-import 'package:ueehe/screens/welcome_screen.dart';
 
-class SplashScreen extends StatefulWidget {
-  @override
-  _SplashScreenState createState() => _SplashScreenState();
-}
-
-class _SplashScreenState extends State<SplashScreen> {
-  @override
-  void initState() {
-    super.initState();
-    // Wait for 3 seconds before navigating to the next screen
-    Timer(const Duration(seconds: 3), () {
-      _navigateToNextScreen();
-    });
-  }
-
-  // Check if user info is stored in SharedPreferences and navigate accordingly
-  Future<void> _navigateToNextScreen() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool hasProfile = prefs.containsKey('fullName');
-
-    // Navigate to the appropriate screen based on profile data
-    Navigator.pushReplacement(
-      context,
-      PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) =>
-            hasProfile ? SosScreen() : WelcomeScreen(),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          const begin = 0.0;
-          const end = 1.0;
-          const curve = Curves.easeInOut;
-
-          var tween = Tween(begin: begin, end: end);
-          var curvedAnimation = CurvedAnimation(
-            parent: animation,
-            curve: curve,
-          );
-
-          return FadeTransition(
-            opacity: tween.animate(curvedAnimation),
-            child: child,
-          );
-        },
-        transitionDuration: const Duration(milliseconds: 800),
-      ),
-    );
-  }
-
+class SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    // Show splash screen for 3 seconds before checking user info
+    Timer(const Duration(seconds: 3), () {
+      _checkUserInfo(context);
+    });
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.white, // Background color
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Displaying the app logo
+            // Logo or App Icon
             Image.asset(
-              'assets/images/uee_logo.png', // Logo path
-              height: 150,
+              'assets/images/uee_logo.png', // Path to your logo asset
+              height: 250, // Adjust height as needed
             ),
-            const SizedBox(height: 40),
+            const SizedBox(height: 40), // Spacing between image and text
+
             // App Name
             const Text(
               'MedCare',
               style: TextStyle(
-                fontSize: 28,
+                fontSize: 48,
                 fontWeight: FontWeight.bold,
                 color: Colors.black,
               ),
             ),
-            const SizedBox(height: 10),
-            // Subtitle
+
+            // App Tagline
             const Text(
-              'Your trusted partner in emergency,\nproviding immediate support.',
+              'Your trusted partner in emergency, \nproviding immediate support',
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: Color.fromARGB(137, 60, 60, 60),
               ),
             ),
           ],
         ),
       ),
     );
+  }
+
+  // Check if user info or skip status is stored in SharedPreferences
+  Future<void> _checkUserInfo(BuildContext context) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    // Check if user profile is created or if they skipped profile creation
+    bool profileCreated = prefs.containsKey('fullName');
+    bool profileSkipped = prefs.getBool('profileSkipped') ?? false;
+
+    if (profileCreated || profileSkipped) {
+      // Navigate to SOS screen if profile is created or skipped
+      Navigator.pushReplacementNamed(context, '/sos');
+    } else {
+      // Navigate to Welcome screen if no profile data is found
+      Navigator.pushReplacementNamed(context, '/welcome');
+    }
   }
 }

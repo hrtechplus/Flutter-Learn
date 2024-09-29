@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:flutter/services.dart'; // Import for Haptic Feedback
 import 'confirmation_screen.dart';
 
 class CountdownScreen extends StatefulWidget {
@@ -47,6 +48,10 @@ class _CountdownScreenState extends State<CountdownScreen>
   void _startCountdown() {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_counter > 0 && mounted) {
+        // Trigger haptic feedback for each countdown tick
+        HapticFeedback.heavyImpact(); // Provides haptic feedback -- heavy
+        HapticFeedback.vibrate(); // Provides haptic feedback -- vibrate
+
         setState(() {
           _counter--;
         });
@@ -146,7 +151,7 @@ class _CountdownScreenState extends State<CountdownScreen>
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
               decoration: const BoxDecoration(
-                boxShadow: const [
+                boxShadow: [
                   BoxShadow(
                     color: Colors.black12,
                     blurRadius: 10,

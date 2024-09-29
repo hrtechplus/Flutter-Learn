@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'routes/app_routes.dart';
+import 'package:ueehe/screens/essential_info_form_screen.dart';
+import 'package:ueehe/screens/sos_screen.dart';
+import 'package:ueehe/screens/splash_screen.dart';
+import 'package:ueehe/screens/welcome_screen.dart';
 
 void main() {
   runApp(MyApp());
@@ -9,12 +12,14 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'MedCare App',
-      theme: ThemeData(
-        primarySwatch: Colors.red,
-      ),
-      initialRoute: AppRoutes.splash, // Start with SplashScreen
-      onGenerateRoute: AppRoutes.generateRoute, // Use the route generator
+      title: 'Emergency App',
+      initialRoute: '/',
+      routes: {
+        '/': (context) => SplashScreen(),
+        '/welcome': (context) => WelcomeScreen(),
+        '/essentialForm': (context) => EssentialInfoFormScreen(),
+        '/sos': (context) => SosScreen(),
+      },
     );
   }
 }

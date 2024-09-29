@@ -33,9 +33,13 @@ class _EssentialInfoFormScreenState extends State<EssentialInfoFormScreen> {
         title: const SizedBox.shrink(), // No title in the app bar
         actions: [
           TextButton(
-            onPressed: () {
-              Navigator.pushReplacementNamed(
-                  context, '/sos'); // Navigate to SOS screen
+            onPressed: () async {
+              // Store that the user has skipped creating a profile
+              SharedPreferences prefs = await SharedPreferences.getInstance();
+              await prefs.setBool('profileSkipped', true);
+
+              // Navigate to the SOS screen
+              Navigator.pushReplacementNamed(context, '/sos');
             },
             child: const Text(
               'Skip',
