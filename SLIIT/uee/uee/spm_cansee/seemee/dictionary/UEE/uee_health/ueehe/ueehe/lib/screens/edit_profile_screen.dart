@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
+import 'package:intl/intl.dart'; // For formatting date
 
 class EditProfileScreen extends StatefulWidget {
   @override
@@ -82,26 +83,35 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
   }
 
+  // Show the date picker to select the birthday
+  Future<void> _selectDate(BuildContext context) async {
+    DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(), // Initial date shown on the calendar
+      firstDate: DateTime(1900), // Earliest selectable date
+      lastDate: DateTime.now(), // Latest selectable date (today)
+    );
+    if (pickedDate != null) {
+      setState(() {
+        _birthdayController.text = DateFormat('yyyy-MM-dd')
+            .format(pickedDate); // Format and set the selected date
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Edit Profile'),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black54),
-        centerTitle: true,
-      ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: Form(
           key: _formKey,
           child: ListView(
             children: [
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
               const Text('Health Profile',
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
+              const SizedBox(height: 1),
               const Text('To keep you safe we get those',
                   style: TextStyle(color: Colors.black54)),
               const SizedBox(height: 20),
@@ -182,8 +192,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Birthday Field
-              _buildTextField(_birthdayController, 'Birthday'),
+              // Birthday Field (with calendar picker)
+              GestureDetector(
+                onTap: () => _selectDate(context), // Show Date Picker
+                child: AbsorbPointer(
+                  // Prevent keyboard from appearing
+                  child: _buildTextField(_birthdayController, 'Birthday'),
+                ),
+              ),
               const SizedBox(height: 40),
 
               // Save Button
@@ -201,8 +217,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: const Text('Save',
-                    style: TextStyle(fontSize: 18, color: Colors.white)),
+                child: const Text('Save my profile',
+                    style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white)),
               ),
             ],
           ),
