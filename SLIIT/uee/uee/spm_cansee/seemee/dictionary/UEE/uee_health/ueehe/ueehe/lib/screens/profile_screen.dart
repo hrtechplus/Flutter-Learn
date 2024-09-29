@@ -44,22 +44,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Hello, Hasindu'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.menu),
-            onPressed: () {
-              // Menu or settings action here
-            },
-          ),
-        ],
-      ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: ListView(
           children: [
+            const SizedBox(height: 20),
             const Text(
               'Health Profile',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
@@ -68,6 +57,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const Text('To keep you safe we get those',
                 style: TextStyle(color: Colors.black54)),
             const SizedBox(height: 20),
+
+            // Profile picture and user info
             Center(
               child: Column(
                 children: [
@@ -83,33 +74,46 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     backgroundColor: Colors.grey,
                   ),
                   const SizedBox(height: 10),
-                  Text(fullName,
-                      style: const TextStyle(
-                          fontSize: 20, fontWeight: FontWeight.bold)),
-                  Text(birthDate,
-                      style: const TextStyle(color: Colors.black54)),
+                  Text(
+                    fullName,
+                    style: const TextStyle(
+                        fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    birthDate,
+                    style: const TextStyle(color: Colors.black54),
+                  ),
                 ],
               ),
             ),
             const SizedBox(height: 20),
+
+            // Blood Type, Height, Weight
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _buildInfoColumn('Blood Type', bloodType),
-                _buildInfoColumn('Height', height),
-                _buildInfoColumn('Weight', weight),
+                _buildInfoColumn('Height', '$height cm'),
+                _buildInfoColumn('Weight', '$weight kg'),
               ],
             ),
-            const SizedBox(height: 20),
-            const Text('Extra Information',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 40),
+
+            // Extra Information
+            const Text(
+              'Extra Information',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 10),
             _buildInfoRow('Address', address),
             const SizedBox(height: 10),
             _buildInfoRow('Phone number', phoneNumber),
             const SizedBox(height: 10),
             _buildInfoRow('Allergies', allergies),
-            const Spacer(),
+
+            const SizedBox(height: 20),
+
+            // Edit button
             Align(
               alignment: Alignment.bottomRight,
               child: FloatingActionButton(
@@ -119,16 +123,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => EditProfileScreen(
-                              profileImagePath: profileImagePath,
-                              fullName: fullName,
-                              birthDate: birthDate,
-                              phoneNumber: phoneNumber,
-                              bloodType: bloodType,
-                              allergies: allergies,
-                              height: height,
-                              weight: weight,
-                            )),
+                      builder: (context) => EditProfileScreen(
+                        profileImagePath: profileImagePath,
+                        fullName: fullName,
+                        birthDate: birthDate,
+                        phoneNumber: phoneNumber,
+                        bloodType: bloodType,
+                        allergies: allergies,
+                        height: height,
+                        weight: weight,
+                      ),
+                    ),
                   );
                 },
                 child: const Icon(Icons.edit, color: Colors.white),
