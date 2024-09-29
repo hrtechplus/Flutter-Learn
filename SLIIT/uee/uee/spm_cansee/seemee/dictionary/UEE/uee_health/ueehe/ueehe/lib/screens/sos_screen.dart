@@ -210,7 +210,7 @@ class _SosScreenContentState extends State<SosScreenContent>
         const Text(
           "Are you in an emergency?",
           style: TextStyle(
-            fontSize: 22,
+            fontSize: 24,
             fontWeight: FontWeight.bold,
             color: Colors.black,
           ),
@@ -219,7 +219,7 @@ class _SosScreenContentState extends State<SosScreenContent>
         const Padding(
           padding: EdgeInsets.symmetric(horizontal: 40.0),
           child: Text(
-            "Hold the SOS button for a while, the urgent situation will start soo.",
+            "Hold the SOS button for a while,if you are in an urgent situation and needed help.Your live location will be shared with your homies",
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 14,

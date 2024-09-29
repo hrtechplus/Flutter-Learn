@@ -14,7 +14,9 @@ class CustomBottomNavigationBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return CurvedNavigationBar(
       index: selectedIndex,
+
       height: 60.0,
+
       backgroundColor:
           Colors.transparent, // Keeps it transparent to reveal body content
       color: Colors.redAccent, // Background color of the curved bar

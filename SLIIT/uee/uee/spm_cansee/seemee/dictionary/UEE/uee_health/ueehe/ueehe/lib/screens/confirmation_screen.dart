@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class ConfirmationScreen extends StatelessWidget {
+class ConfirmationScreen extends StatefulWidget {
   final String location;
   final double latitude;
   final double longitude;
@@ -13,10 +13,55 @@ class ConfirmationScreen extends StatelessWidget {
   });
 
   @override
+  _ConfirmationScreenState createState() => _ConfirmationScreenState();
+}
+
+class _ConfirmationScreenState extends State<ConfirmationScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Initialize the animation controller for the pulsing effect
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2), // Duration for one pulse
+    )..repeat(
+        reverse: true); // Repeat the animation in reverse for a pulsing effect
+
+    // Define the Tween for scaling the navigation arrow and circles
+    _animation = Tween<double>(begin: 0.8, end: 1.2).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose(); // Dispose the animation controller when done
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
+          // Background gradient
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color.fromARGB(255, 255, 122, 122),
+                  Color.fromARGB(255, 255, 71, 71)
+                ], // Light to darker red
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+          ),
           SafeArea(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -54,32 +99,85 @@ class ConfirmationScreen extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
-                      color: Colors.redAccent,
+                      color: Colors.white,
                     ),
                   ),
                 ),
 
                 const SizedBox(height: 20),
 
-                // Navigation Arrow inside a circle
+                // Animated Navigation Arrow inside a ripple effect
                 Center(
-                  child: Container(
-                    height: 200,
-                    width: 200,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: Colors.redAccent,
-                        width: 8,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      // Ripple Circle 1
+                      AnimatedBuilder(
+                        animation: _controller,
+                        builder: (context, child) {
+                          return Transform.scale(
+                            scale: _animation.value,
+                            child: Container(
+                              height: 250,
+                              width: 250,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: Colors.white.withOpacity(0.3),
+                                  width: 4,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
                       ),
-                    ),
-                    child: const Center(
-                      child: Icon(
+                      // Ripple Circle 2
+                      AnimatedBuilder(
+                        animation: _controller,
+                        builder: (context, child) {
+                          return Transform.scale(
+                            scale: _animation.value * 0.85,
+                            child: Container(
+                              height: 200,
+                              width: 200,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: Colors.white.withOpacity(0.3),
+                                  width: 4,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                      // Ripple Circle 3
+                      AnimatedBuilder(
+                        animation: _controller,
+                        builder: (context, child) {
+                          return Transform.scale(
+                            scale: _animation.value * 0.7,
+                            child: Container(
+                              height: 150,
+                              width: 150,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: Colors.white.withOpacity(0.3),
+                                  width: 4,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                      // Navigation Arrow Icon (Center)
+                      const Icon(
                         Icons.navigation, // Navigation arrow icon
                         size: 80,
-                        color: Colors.redAccent,
+                        color: Colors.white,
                       ),
-                    ),
+                    ],
                   ),
                 ),
 

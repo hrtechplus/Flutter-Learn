@@ -18,14 +18,30 @@ class CountdownScreen extends StatefulWidget {
   _CountdownScreenState createState() => _CountdownScreenState();
 }
 
-class _CountdownScreenState extends State<CountdownScreen> {
+class _CountdownScreenState extends State<CountdownScreen>
+    with SingleTickerProviderStateMixin {
   int _counter = 3; // Countdown starts at 3 seconds
   Timer? _timer;
+
+  late AnimationController
+      _animationController; // Controller for the breathing animation
+  late Animation<double> _animation; // Animation value for scaling
 
   @override
   void initState() {
     super.initState();
     _startCountdown();
+
+    // Initialize the animation controller for pulsing
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 1), // Duration for one breathing cycle
+    )..repeat(reverse: true); // Repeat the animation (breathing effect)
+
+    // Tween to scale between 0.9x and 1.0x for the breathing effect
+    _animation = Tween<double>(begin: 0.9, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
   }
 
   void _startCountdown() {
@@ -58,6 +74,7 @@ class _CountdownScreenState extends State<CountdownScreen> {
   @override
   void dispose() {
     _timer?.cancel();
+    _animationController.dispose(); // Dispose the animation controller
     super.dispose();
   }
 
@@ -94,24 +111,32 @@ class _CountdownScreenState extends State<CountdownScreen> {
             ),
             const Spacer(),
 
-            // Countdown Timer Circle
-            Container(
-              height: 200,
-              width: 200,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.redAccent, width: 8),
-              ),
-              child: Center(
-                child: Text(
-                  '$_counter',
-                  style: const TextStyle(
-                    fontSize: 80,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.redAccent,
+            // Countdown Timer Circle with breathing animation
+            AnimatedBuilder(
+              animation: _animationController,
+              builder: (context, child) {
+                return Transform.scale(
+                  scale: _animation.value, // Scale the countdown circle
+                  child: Container(
+                    height: 200,
+                    width: 200,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.redAccent, width: 8),
+                    ),
+                    child: Center(
+                      child: Text(
+                        '$_counter',
+                        style: const TextStyle(
+                          fontSize: 80,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.redAccent,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-              ),
+                );
+              },
             ),
 
             const Spacer(),
