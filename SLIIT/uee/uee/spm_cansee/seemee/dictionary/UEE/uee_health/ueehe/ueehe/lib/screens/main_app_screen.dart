@@ -15,8 +15,8 @@ class _MainAppScreenState extends State<MainAppScreen> {
   // List of screens corresponding to each tab in the bottom navigation bar
   final List<Widget> _screens = [
     SosScreen(), // SOS Home Screen
-    ProfileScreen(), // Profile Screen
     HistoryScreen(), // History Screen
+    ProfileScreen(), // Profile Screen
   ];
 
   // Function to handle tab switching

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
+import '../widgets/custom_bottom_navigation_bar.dart'; // Import the custom navigation bar
 import 'profile_screen.dart';
 import 'history_screen.dart';
 import 'countdown_screen.dart';
@@ -29,9 +30,9 @@ class _SosScreenState extends State<SosScreen> {
     _screens.add(SosHomeScreen(
       location: _currentLocation,
       onEmergencyPressed: _startEmergencyProcedure,
-    )); // SOS Home Screen
-    _screens.add(ProfileScreen()); // Profile Screen
-    _screens.add(HistoryScreen()); // History Screen
+    )); // SOS Home Screen (First Tab)
+    _screens.add(HistoryScreen()); // History Screen (Second Tab)
+    _screens.add(ProfileScreen()); // Profile Screen (Third Tab)
     _requestPermissions();
   }
 
@@ -103,29 +104,15 @@ class _SosScreenState extends State<SosScreen> {
       body: SafeArea(
         child: _screens[_selectedIndex], // Display the selected screen
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex, // Track the selected tab index
-        onTap: _onTabSelected, // Update the tab when user taps
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.warning_amber_rounded),
-            label: 'SOS',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.history),
-            label: 'History',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
+      bottomNavigationBar: CustomBottomNavigationBar(
+        selectedIndex: _selectedIndex, // Pass the current index
+        onTabSelected: _onTabSelected, // Pass the tab selection callback
       ),
     );
   }
 }
 
-// A new SosHomeScreen widget that uses the emergency button and location
+// SosHomeScreen widget remains the same
 class SosHomeScreen extends StatelessWidget {
   final VoidCallback onEmergencyPressed;
   final String location;

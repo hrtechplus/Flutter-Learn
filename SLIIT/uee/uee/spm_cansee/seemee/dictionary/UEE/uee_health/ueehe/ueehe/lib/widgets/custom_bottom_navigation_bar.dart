@@ -1,34 +1,32 @@
 import 'package:flutter/material.dart';
-import '../routes/app_routes.dart';
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 
 class CustomBottomNavigationBar extends StatelessWidget {
   final int selectedIndex;
   final ValueChanged<int> onTabSelected;
 
-  const CustomBottomNavigationBar({
-    Key? key,
+  CustomBottomNavigationBar({
     required this.selectedIndex,
     required this.onTabSelected,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
-    return BottomNavigationBar(
-      currentIndex: selectedIndex,
-      onTap: onTabSelected,
+    return CurvedNavigationBar(
+      index: selectedIndex,
+      height: 60.0,
+      backgroundColor:
+          Colors.transparent, // Keeps it transparent to reveal body content
+      color: Colors.redAccent, // Background color of the curved bar
+      buttonBackgroundColor: Colors.red, // Color of the center button
+      animationDuration:
+          const Duration(milliseconds: 300), // Animation duration
+      animationCurve: Curves.easeInOut, // Animation curve for smooth effect
+      onTap: onTabSelected, // Handle tab changes
       items: const [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.warning_amber_rounded),
-          label: 'SOS',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.history),
-          label: 'History',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.person),
-          label: 'Profile',
-        ),
+        Icon(Icons.warning_rounded, size: 30, color: Colors.white),
+        Icon(Icons.history_edu_rounded, size: 30, color: Colors.white),
+        Icon(Icons.person, size: 30, color: Colors.white),
       ],
     );
   }
