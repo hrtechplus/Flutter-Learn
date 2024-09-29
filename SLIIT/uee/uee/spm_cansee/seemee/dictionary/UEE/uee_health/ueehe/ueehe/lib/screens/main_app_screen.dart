@@ -5,6 +5,8 @@ import 'history_screen.dart';
 import '../widgets/custom_bottom_navigation_bar.dart';
 
 class MainAppScreen extends StatefulWidget {
+  const MainAppScreen({super.key});
+
   @override
   _MainAppScreenState createState() => _MainAppScreenState();
 }

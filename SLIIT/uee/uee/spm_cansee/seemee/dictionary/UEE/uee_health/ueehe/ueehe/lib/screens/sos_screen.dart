@@ -141,7 +141,8 @@ class SosScreenContent extends StatefulWidget {
   final VoidCallback onEmergencyPressed;
   final String location;
 
-  SosScreenContent({required this.onEmergencyPressed, required this.location});
+  const SosScreenContent(
+      {super.key, required this.onEmergencyPressed, required this.location});
 
   @override
   _SosScreenContentState createState() => _SosScreenContentState();

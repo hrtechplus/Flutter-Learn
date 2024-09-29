@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:mailer/mailer.dart';
+import 'package:mailer/smtp_server.dart';
 
 class ConfirmationScreen extends StatefulWidget {
   final String location;
@@ -36,12 +38,41 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
     _animation = Tween<double>(begin: 0.8, end: 1.2).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
+
+    // Send email when landing on this screen
+    sendEmail();
   }
 
   @override
   void dispose() {
     _controller.dispose(); // Dispose the animation controller when done
     super.dispose();
+  }
+
+  Future<void> sendEmail() async {
+    final smtpServer = gmail(
+        'your_email@gmail.com', 'your_password'); // Use your Gmail credentials
+
+    // Create the email message
+    final message = Message()
+      ..from = Address('rawart.media@gmail.com', 'MedCare App')
+      ..recipients.add('rawart.media@gmail.com') // Recipient email
+      ..subject = 'SOS Confirmation - User Location ${DateTime.now()}'
+      ..text = 'The user is at the following location:\n\n'
+          'Location: ${widget.location}\n'
+          'Latitude: ${widget.latitude}\n'
+          'Longitude: ${widget.longitude}\n\n'
+          'Support is on the way!';
+
+    try {
+      final sendReport = await send(message, smtpServer);
+      print('Message sent: $sendReport');
+    } on MailerException catch (e) {
+      print('Message not sent. \n$e');
+      for (var p in e.problems) {
+        print('Problem: ${p.code}: ${p.msg}');
+      }
+    }
   }
 
   @override
@@ -95,7 +126,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
                 // Support message
                 const Center(
                   child: Text(
-                    "Support is On the Way!",
+                    "Support is On the Way!!",
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,

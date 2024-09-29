@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class EssentialInfoFormScreen extends StatefulWidget {
+  const EssentialInfoFormScreen({super.key});
+
   @override
   _EssentialInfoFormScreenState createState() =>
       _EssentialInfoFormScreenState();
