@@ -43,18 +43,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Hello, $_name'),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black54),
-        centerTitle: true,
-      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: ListView(
             children: [
+              const SizedBox(height: 8),
+              // Health Profile Section
+              const Text(
+                "Health Profile",
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 1),
+              const Text(
+                "To keep you safe we get those",
+                style: TextStyle(color: Colors.black54),
+              ),
+              const SizedBox(height: 16),
+
               const SizedBox(height: 20),
               // Profile Image
               Center(
@@ -93,21 +102,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
               const SizedBox(height: 20),
-
-              // Health Profile Section
-              const Text(
-                "Health Profile",
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                "To keep you safe we get those",
-                style: TextStyle(color: Colors.black54),
-              ),
-              const SizedBox(height: 16),
 
               // Blood Type, Height, Weight in a Row
               Row(
