@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'sos_screen.dart';
 import 'profile_screen.dart';
 import 'history_screen.dart';
+import '../widgets/custom_bottom_navigation_bar.dart';
 
 class MainAppScreen extends StatefulWidget {
-  const MainAppScreen({Key? key}) : super(key: key);
-
   @override
   _MainAppScreenState createState() => _MainAppScreenState();
 }
@@ -13,15 +12,15 @@ class MainAppScreen extends StatefulWidget {
 class _MainAppScreenState extends State<MainAppScreen> {
   int _selectedIndex = 0;
 
-  // Define the screens for the bottom navigation
+  // List of screens corresponding to each tab in the bottom navigation bar
   final List<Widget> _screens = [
-    const SosScreen(), // SOS Screen
-    const HistoryScreen(), // History Screen (optional)
-    const ProfileScreen(), // Profile Screen for user editing
+    SosScreen(), // SOS Home Screen
+    ProfileScreen(), // Profile Screen
+    HistoryScreen(), // History Screen
   ];
 
-  // Handle navigation taps
-  void _onItemTapped(int index) {
+  // Function to handle tab switching
+  void _onTabSelected(int index) {
     setState(() {
       _selectedIndex = index;
     });
@@ -30,27 +29,13 @@ class _MainAppScreenState extends State<MainAppScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _screens[_selectedIndex], // Display the selected screen
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped, // Handle taps on the bottom navigation items
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'SOS',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.history),
-            label: 'History',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
-        selectedItemColor: Colors.redAccent,
-        unselectedItemColor: Colors.grey,
-        type: BottomNavigationBarType.fixed,
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: _screens, // Keeps state of all screens
+      ),
+      bottomNavigationBar: CustomBottomNavigationBar(
+        selectedIndex: _selectedIndex,
+        onTabSelected: _onTabSelected, // Handle tab selection
       ),
     );
   }
