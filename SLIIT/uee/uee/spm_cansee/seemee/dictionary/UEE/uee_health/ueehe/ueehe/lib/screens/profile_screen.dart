@@ -54,16 +54,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 "Health Profile",
                 style: TextStyle(
                   fontSize: 32,
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 1),
-              const Text(
-                "To keep you safe we get those",
-                style: TextStyle(
-                    color: Color.fromARGB(95, 0, 0, 0),
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold),
+
+              const Divider(
+                thickness: 1,
+                color: Color.fromARGB(96, 158, 158, 158),
               ),
               const SizedBox(height: 16),
 
