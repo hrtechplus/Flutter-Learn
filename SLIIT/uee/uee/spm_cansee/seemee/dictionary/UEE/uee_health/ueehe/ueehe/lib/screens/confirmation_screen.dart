@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server.dart';
+import 'package:vibration/vibration.dart';
 
 class ConfirmationScreen extends StatefulWidget {
   final String location;
@@ -257,6 +259,10 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
                         onPressed: () {
                           Navigator.pop(
                               context); // Return to the previous screen
+                          // make long vibration
+                          HapticFeedback.heavyImpact();
+
+                          HapticFeedback.vibrate();
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
