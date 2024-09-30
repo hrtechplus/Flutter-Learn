@@ -18,6 +18,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Emergency App',
+      theme: ThemeData(textTheme: GoogleFonts.poppinsTextTheme()),
       initialRoute: '/',
       routes: {
         '/': (context) => SplashScreen(),

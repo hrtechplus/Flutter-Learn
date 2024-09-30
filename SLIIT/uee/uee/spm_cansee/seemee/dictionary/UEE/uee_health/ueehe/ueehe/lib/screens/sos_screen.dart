@@ -3,6 +3,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart'; // For phone call functionality
+
+import 'package:flutter/services.dart'; // Import the services package for HapticFeedback
 import '../widgets/custom_bottom_navigation_bar.dart'; // Import the custom navigation bar
 import 'profile_screen.dart';
 import 'history_screen.dart';
@@ -179,13 +181,108 @@ class _SosScreenContentState extends State<SosScreenContent>
   }
 
   // Method to make a call to "1990"
+
   Future<void> _callEmergencyService() async {
     const emergencyNumber = 'tel:1990';
     if (await canLaunch(emergencyNumber)) {
       await launch(emergencyNumber); // Launches the dialer with 1990
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Could not launch call")),
+      // Add haptic feedback pulse
+      HapticFeedback.heavyImpact(); // Provides haptic feedback -- heavy
+      HapticFeedback.vibrate(); // Provides haptic feedback -- vibrate
+      // Show custom alert dialog if the call cannot be made
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return Center(
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              margin: const EdgeInsets.symmetric(horizontal: 30),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20), // Rounded corners
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4), // Shadow positioning
+                  ),
+                ],
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Error icon
+                    Container(
+                      height: 60,
+                      width: 60,
+                      decoration: BoxDecoration(
+                        color: Colors.red[100], // Light pink background
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.close, // Error close icon
+                        size: 30,
+                        color: Colors.redAccent, // Pink accent for the icon
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Title
+                    const Text(
+                      'Failed to call 1990',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+
+                    // Subtitle / description
+                    const Text(
+                      'Hmm, seems like we have no permission to call 1990.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
+                    ),
+                    const SizedBox(height: 30),
+
+                    // Try again button
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop(); // Close the dialog
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.redAccent, // Button color
+                        shape: RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.circular(30), // Rounded button
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 40,
+                          vertical: 8,
+                        ),
+                      ),
+                      child: const Text(
+                        'Try again',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
       );
     }
   }
@@ -325,22 +422,35 @@ class _SosScreenContentState extends State<SosScreenContent>
         ),
         const SizedBox(height: 20),
         // Call 1990 Suwa Seriya Button
-        ElevatedButton(
-          onPressed: _callEmergencyService,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 60),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-              side: const BorderSide(color: Colors.redAccent, width: 2),
+        Container(
+          margin:
+              const EdgeInsets.symmetric(horizontal: 20), // Horizontal margin
+          child: ElevatedButton(
+            onPressed: () => _callEmergencyService(),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: const BorderSide(color: Colors.redAccent, width: 2),
+              ),
             ),
-          ),
-          child: const Text(
-            "Call 1990 සුව සැරිය ",
-            style: TextStyle(
-              color: Colors.redAccent,
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
+            child: Row(
+              mainAxisAlignment:
+                  MainAxisAlignment.center, // Center the content horizontally
+              children: [
+                const Icon(FontAwesomeIcons.ambulance, color: Colors.redAccent),
+                const SizedBox(
+                    width: 10), // Adjust spacing between icon and text
+                const Text(
+                  "Call 1990 සුව සැරිය",
+                  style: TextStyle(
+                    color: Colors.redAccent,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
+                ),
+              ],
             ),
           ),
         ),
