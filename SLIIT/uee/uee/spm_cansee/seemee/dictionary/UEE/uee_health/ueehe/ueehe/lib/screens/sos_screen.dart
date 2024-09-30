@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:url_launcher/url_launcher.dart'; // For phone call functionality
 import '../widgets/custom_bottom_navigation_bar.dart'; // Import the custom navigation bar
 import 'profile_screen.dart';
 import 'history_screen.dart';
@@ -177,6 +178,18 @@ class _SosScreenContentState extends State<SosScreenContent>
     super.dispose();
   }
 
+  // Method to make a call to "1990"
+  Future<void> _callEmergencyService() async {
+    const emergencyNumber = 'tel:1990';
+    if (await canLaunch(emergencyNumber)) {
+      await launch(emergencyNumber); // Launches the dialer with 1990
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Could not launch call")),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -220,7 +233,7 @@ class _SosScreenContentState extends State<SosScreenContent>
         const Padding(
           padding: EdgeInsets.symmetric(horizontal: 40.0),
           child: Text(
-            "Hold the SOS button for a while,if you are in an urgent situation and needed help.Your live location will be shared with your homies.",
+            "Hold the SOS button for a while, if you are in an urgent situation and needed help. Your live location will be shared with your homies.",
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 14,
@@ -308,6 +321,27 @@ class _SosScreenContentState extends State<SosScreenContent>
                 ),
               ),
             ],
+          ),
+        ),
+        const SizedBox(height: 20),
+        // Call 1990 Suwa Seriya Button
+        ElevatedButton(
+          onPressed: _callEmergencyService,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 60),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: const BorderSide(color: Colors.redAccent, width: 2),
+            ),
+          ),
+          child: const Text(
+            "Call 1990 සුව සැරිය ",
+            style: TextStyle(
+              color: Colors.redAccent,
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+            ),
           ),
         ),
       ],
