@@ -53,14 +53,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const Text(
                 "Health Profile",
                 style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 32,
+                  fontWeight: FontWeight.w800,
                 ),
               ),
               const SizedBox(height: 1),
               const Text(
                 "To keep you safe we get those",
-                style: TextStyle(color: Colors.black54),
+                style: TextStyle(
+                    color: Color.fromARGB(95, 0, 0, 0),
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
 
@@ -69,7 +72,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Center(
                 child: CircleAvatar(
                   radius: 50,
-                  backgroundColor: Colors.grey[300],
+                  backgroundColor: Colors.red[300],
                   child: const Icon(
                     Icons.person,
                     size: 50,
@@ -86,13 +89,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     Text(
                       _name ?? '',
                       style: const TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
+                        fontSize: 24,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 2),
                     Text(
-                      _birthdate ?? '',
+                      'Birthday: ' + (_birthdate ?? ''),
+                      semanticsLabel: _birthdate ?? '',
                       style: const TextStyle(
                         color: Colors.grey,
                         fontSize: 16,
@@ -107,9 +111,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _buildHealthData("Blood Type", _bloodType ?? ''),
-                  _buildHealthData("Height", _height ?? ''),
-                  _buildHealthData("Weight", _weight ?? ''),
+                  _buildHealthData("Blood T", _bloodType ?? ''),
+                  _buildHealthData("Height", (_height ?? '') + 'cm'),
+                  _buildHealthData("Weight", (_weight ?? '') + 'Kg'),
                 ],
               ),
               const SizedBox(height: 30),

@@ -261,6 +261,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
                               context); // Return to the previous screen
                           // make long vibration
                           HapticFeedback.heavyImpact();
+                          // make short vibration
 
                           HapticFeedback.vibrate();
                         },
