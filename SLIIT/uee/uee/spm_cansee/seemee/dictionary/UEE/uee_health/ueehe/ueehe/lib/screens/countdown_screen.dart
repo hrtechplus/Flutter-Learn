@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flutter/services.dart'; // Import for Haptic Feedback
+import 'package:audioplayers/audioplayers.dart'; // Import for AudioPlayer
 import 'confirmation_screen.dart';
 
 class CountdownScreen extends StatefulWidget {
@@ -48,6 +49,8 @@ class _CountdownScreenState extends State<CountdownScreen>
   void _startCountdown() {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_counter > 0 && mounted) {
+        // play sound for each countdown tick
+
         // Trigger haptic feedback for each countdown tick
         HapticFeedback.heavyImpact(); // Provides haptic feedback -- heavy
         HapticFeedback.vibrate(); // Provides haptic feedback -- vibrate

@@ -182,10 +182,13 @@ class _SosScreenContentState extends State<SosScreenContent>
 
   // Method to make a call to "1990"
 
+  /// Makes a call to 1990 emergency service. If the call cannot be made, shows
+  /// a custom alert dialog with a 'Try again' button.
   Future<void> _callEmergencyService() async {
     const emergencyNumber = 'tel:1990';
-    if (await canLaunch(emergencyNumber)) {
-      await launch(emergencyNumber); // Launches the dialer with 1990
+    if (await canLaunchUrl(Uri.parse(emergencyNumber))) {
+      await launchUrl(
+          Uri.parse(emergencyNumber)); // Launches the dialer with 1990
     } else {
       // Add haptic feedback pulse
       HapticFeedback.heavyImpact(); // Provides haptic feedback -- heavy
@@ -288,6 +291,13 @@ class _SosScreenContentState extends State<SosScreenContent>
   }
 
   @override
+
+  /// Builds the SOS screen, with a top app bar and a SOS button in the center.
+  /// The SOS button has a breathing animation and a long press detector to
+  /// activate the emergency service.
+  ///
+  /// The location is displayed below the SOS button, and a button to call the
+  /// 1990 Suwa Seriya emergency service is at the bottom of the screen.
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
