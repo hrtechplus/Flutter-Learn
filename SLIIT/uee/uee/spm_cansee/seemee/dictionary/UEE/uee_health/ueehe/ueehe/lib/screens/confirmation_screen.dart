@@ -1,3 +1,4 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mailer/mailer.dart';
@@ -26,7 +27,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
   late Animation<double> _animation;
 
   @override
-  void initState() {
+  Future<void> initState() async {
     super.initState();
 
     // Initialize the animation controller for the pulsing effect
@@ -43,6 +44,11 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
 
     // Send email when landing on this screen
     sendEmail();
+
+    // Vibrate when landing on this screen
+    Vibration.vibrate(
+      pattern: [500, 1000, 500, 1000],
+    );
   }
 
   @override
