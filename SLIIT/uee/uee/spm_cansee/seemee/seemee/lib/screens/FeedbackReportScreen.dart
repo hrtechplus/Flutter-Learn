@@ -22,46 +22,44 @@ class FeedbackReportScreen extends StatelessWidget {
     // Fetch feedback data from Firestore
     QuerySnapshot snapshot =
         await feedbacks.orderBy('timestamp', descending: true).get();
-    List<pw.Widget> feedbackWidgets = [];
+    List<pw.Widget> feedbackTableRows = [];
 
-    feedbackWidgets.add(
-      pw.Text(
-        'Feedback Report',
-        style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold),
+    // Add a header with the total number of feedbacks
+    feedbackTableRows.add(
+      pw.Padding(
+        padding: const pw.EdgeInsets.only(bottom: 10),
+        child: pw.Text(
+          'Feedback Report - Total Feedbacks: ${snapshot.docs.length}',
+          style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold),
+        ),
       ),
     );
 
-    // Add each feedback item to the PDF
-    for (var document in snapshot.docs) {
-      String feedbackText = document['feedback'] ?? 'No feedback provided';
-      Timestamp timestamp = document['timestamp'] ?? Timestamp.now();
-      String formattedDate = _formatTimestamp(timestamp);
+    // Create table headers
+    feedbackTableRows.add(
+      // ignore: deprecated_member_use
+      pw.Table.fromTextArray(
+        headers: ['Feedback Text', 'Date & Time'],
+        columnWidths: {
+          0: const pw.FlexColumnWidth(4),
+          1: const pw.FlexColumnWidth(2),
+        },
+        border: pw.TableBorder.all(),
+        cellStyle: const pw.TextStyle(fontSize: 12),
+        headerStyle: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
+        data: snapshot.docs.map((document) {
+          String feedbackText = document['feedback'] ?? 'No feedback provided';
+          Timestamp timestamp = document['timestamp'] ?? Timestamp.now();
+          String formattedDate = _formatTimestamp(timestamp);
+          return [feedbackText, formattedDate];
+        }).toList(),
+      ),
+    );
 
-      feedbackWidgets.add(
-        pw.Padding(
-          padding: const pw.EdgeInsets.symmetric(vertical: 8.0),
-          child: pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              pw.Text(
-                feedbackText,
-                style: const pw.TextStyle(fontSize: 18),
-              ),
-              pw.Text(
-                'Date: $formattedDate',
-                style: const pw.TextStyle(fontSize: 12, color: PdfColors.grey),
-              ),
-              pw.Divider(),
-            ],
-          ),
-        ),
-      );
-    }
-
-    // Add all feedbacks to the PDF document
+    // Add all feedbacks to the PDF document in table format
     pdf.addPage(
       pw.MultiPage(
-        build: (context) => feedbackWidgets,
+        build: (context) => feedbackTableRows,
       ),
     );
 
@@ -134,12 +132,26 @@ class FeedbackReportScreen extends StatelessWidget {
             const SizedBox(height: 20),
             ElevatedButton.icon(
               onPressed: () => _generatePdf(context),
-              icon: const Icon(Icons.download),
-              label: const Text("Download Report as PDF"),
+              icon: const Icon(
+                Icons.download,
+                color: Colors.white, // White icon color
+              ),
+              label: const Text(
+                "Download Report as PDF",
+                style: TextStyle(
+                  color: Colors.white, // White text color
+                  fontSize: 18, // Font size
+                  fontWeight: FontWeight.bold, // Bold font
+                ),
+              ),
               style: ElevatedButton.styleFrom(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 15, horizontal: 30),
-                textStyle: const TextStyle(fontSize: 18),
+                backgroundColor:
+                    Colors.blueAccent, // Background color of the button
+                padding: const EdgeInsets.symmetric(
+                    vertical: 15, horizontal: 40), // Padding inside the button
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30), // Rounded corners
+                ),
               ),
             ),
           ],

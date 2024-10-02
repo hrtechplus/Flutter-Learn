@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:intl/intl.dart'; // For date formatting
 import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:intl/intl.dart'; // For date formatting
 import 'FeedbackReportScreen.dart';
 import 'feedback_report_screen.dart'; // Import the report screen
+import 'home_screen.dart'; // Import HomeScreen for navigation
 
 import 'create_feedback_screen.dart';
-import 'read_feedback_screen.dart';
 import 'update_feedback_screen.dart';
 import 'delete_feedback_screen.dart';
 
@@ -31,6 +31,12 @@ class _ReadFeedbackScreenState extends State<ReadFeedbackScreen> {
     super.initState();
     feedbacks = FirebaseFirestore.instance.collection('feedbacks');
     _initSpeechToText(); // Initialize the speech-to-text functionality
+    _announcePage(); // Announce the page with TTS
+  }
+
+  // Announce the page using Text-to-Speech (TTS)
+  void _announcePage() async {
+    await _flutterTts.speak("You are in the Read Feedback page.");
   }
 
   // Initialize the speech-to-text functionality
@@ -123,101 +129,151 @@ class _ReadFeedbackScreenState extends State<ReadFeedbackScreen> {
     );
   }
 
+  // Handle swipe gestures to go back to HomeScreen
+  void _handleSwipe(DragEndDetails details) {
+    if (details.primaryVelocity! > 0) {
+      // Swipe right (go back)
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+      );
+    } else if (details.primaryVelocity! < 0) {
+      // Swipe left (go back)
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Read Feedback')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            // Display feedback list (dynamic)
-            Expanded(
-              child: StreamBuilder(
-                stream: feedbacks
-                    .orderBy('timestamp', descending: true)
-                    .snapshots(),
-                builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-                  if (!snapshot.hasData) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
+    return GestureDetector(
+      // Handle swipe gestures to go back
+      onHorizontalDragEnd: _handleSwipe,
 
-                  return ListView(
-                    children: snapshot.data!.docs.map((document) {
-                      // Check if feedback exists and handle potential null cases
-                      String feedbackText =
-                          document['feedback'] ?? 'No feedback provided';
-                      Timestamp timestamp =
-                          document['timestamp'] ?? Timestamp.now();
+      // Handle long press to start listening for commands
+      onLongPress: _startListening,
 
-                      // Dynamically generate a title and format the timestamp
-                      String feedbackTitle = _generateTitle(feedbackText);
-                      String formattedDateTime = _formatTimestamp(timestamp);
+      // Handle double tap to simulate voice command (optional)
+      onDoubleTap: () {
+        if (_commandText.isNotEmpty) {
+          _flutterTts.speak("Double tap detected. Processing command.");
+        }
+      },
 
-                      return Card(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                          side: BorderSide(color: Colors.grey.shade300),
-                        ),
-                        margin: const EdgeInsets.symmetric(vertical: 8),
-                        child: ListTile(
-                          title: Text(
-                              feedbackTitle), // Dynamic title from feedback
-                          subtitle:
-                              Text(formattedDateTime), // Dynamic date and time
-                          trailing: IconButton(
-                            icon: const Icon(Icons.play_arrow),
-                            onPressed: () => _readFeedback(
-                                feedbackText), // Read the feedback aloud
+      child: Scaffold(
+        appBar: AppBar(title: const Text('Read Feedback')),
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              // Display feedback list (dynamic)
+              Expanded(
+                child: StreamBuilder(
+                  stream: feedbacks
+                      .orderBy('timestamp', descending: true)
+                      .snapshots(),
+                  builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                    if (!snapshot.hasData) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    return ListView(
+                      children: snapshot.data!.docs.map((document) {
+                        // Check if feedback exists and handle potential null cases
+                        String feedbackText =
+                            document['feedback'] ?? 'No feedback provided';
+                        Timestamp timestamp =
+                            document['timestamp'] ?? Timestamp.now();
+
+                        // Dynamically generate a title and format the timestamp
+                        String feedbackTitle = _generateTitle(feedbackText);
+                        String formattedDateTime = _formatTimestamp(timestamp);
+
+                        return Card(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
+                            side: BorderSide(color: Colors.grey.shade300),
                           ),
-                        ),
-                      );
-                    }).toList(),
-                  );
-                },
+                          margin: const EdgeInsets.symmetric(vertical: 8),
+                          child: ListTile(
+                            title: Text(
+                                feedbackTitle), // Dynamic title from feedback
+                            subtitle: Text(
+                                formattedDateTime), // Dynamic date and time
+                            trailing: IconButton(
+                              icon: const Icon(Icons.play_arrow),
+                              onPressed: () => _readFeedback(
+                                  feedbackText), // Read the feedback aloud
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    );
+                  },
+                ),
               ),
-            ),
 
-            // Microphone button at the bottom
-            const Divider(),
-            GestureDetector(
-              onTap: _isListening
-                  ? _stopListening
-                  : _startListening, // Start or stop listening
-              child: Column(
-                children: [
-                  Container(
-                    width: 150,
-                    height: 150,
-                    decoration: BoxDecoration(
-                      color: _isListening
-                          ? Colors.green
-                          : Colors.redAccent, // Change color when listening
-                      borderRadius: BorderRadius.circular(75), // Rounded circle
+              // Microphone button at the bottom
+              const Divider(),
+              GestureDetector(
+                onTap: _isListening
+                    ? _stopListening
+                    : _startListening, // Start or stop listening
+                child: Column(
+                  children: [
+                    Container(
+                      width: 150,
+                      height: 150,
+                      decoration: BoxDecoration(
+                        color: _isListening
+                            ? Colors.green
+                            : Colors.blueAccent, // Change color when listening
+                        borderRadius:
+                            BorderRadius.circular(75), // Rounded circle
+                      ),
+                      child: const Icon(
+                        Icons.mic,
+                        color: Colors.white,
+                        size: 70, // Larger icon for accessibility
+                      ),
                     ),
-                    child: const Icon(
-                      Icons.mic,
-                      color: Colors.white,
-                      size: 70, // Larger icon for accessibility
+                    const SizedBox(height: 10),
+                    const Text(
+                      "Listening...",
+                      style: TextStyle(fontSize: 18, color: Colors.grey),
                     ),
-                  ),
-                  const SizedBox(height: 10),
-                  const Text(
-                    "Listening...",
-                    style: TextStyle(fontSize: 18, color: Colors.grey),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
 
-            const SizedBox(height: 20),
+              const SizedBox(height: 20),
 
-            // Add the report button for non-visually impaired users
-            ElevatedButton(
-              onPressed: _navigateToReport,
-              child: const Text("Generate Feedback Report"),
-            ),
-          ],
+              // Add the report button for non-visually impaired users
+// Inside your ReadFeedbackScreen class
+              ElevatedButton(
+                onPressed: _navigateToReport,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blueAccent, // Background color
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 40, vertical: 15), // Padding for the button
+                  shape: RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.circular(30), // Fully rounded corners
+                  ),
+                ),
+                child: const Text(
+                  "Show Report",
+                  style: TextStyle(
+                    color: Colors.white, // Text color white
+                    fontSize: 18, // Text size
+                    fontWeight: FontWeight.bold, // Bold font
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
