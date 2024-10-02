@@ -3,6 +3,8 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart'; // For date formatting
 import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'FeedbackReportScreen.dart';
+import 'feedback_report_screen.dart'; // Import the report screen
 
 import 'create_feedback_screen.dart';
 import 'read_feedback_screen.dart';
@@ -113,6 +115,14 @@ class _ReadFeedbackScreenState extends State<ReadFeedbackScreen> {
     );
   }
 
+  // Navigate to report screen
+  void _navigateToReport() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => FeedbackReportScreen()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -198,6 +208,14 @@ class _ReadFeedbackScreenState extends State<ReadFeedbackScreen> {
                   ),
                 ],
               ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // Add the report button for non-visually impaired users
+            ElevatedButton(
+              onPressed: _navigateToReport,
+              child: const Text("Generate Feedback Report"),
             ),
           ],
         ),

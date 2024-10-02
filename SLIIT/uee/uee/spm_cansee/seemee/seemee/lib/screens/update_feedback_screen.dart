@@ -3,6 +3,7 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:intl/intl.dart'; // For date formatting
+import 'home_screen.dart'; // Import HomeScreen for navigation
 
 class UpdateFeedbackScreen extends StatefulWidget {
   const UpdateFeedbackScreen({super.key});
@@ -25,6 +26,12 @@ class _UpdateFeedbackScreenState extends State<UpdateFeedbackScreen> {
     super.initState();
     feedbacks = FirebaseFirestore.instance.collection('feedbacks');
     _speechToText = stt.SpeechToText(); // Initialize Speech to Text
+    _announcePage(); // Announce that we are on the Update Feedback page
+  }
+
+  // Announce the page using Text-to-Speech (TTS)
+  void _announcePage() async {
+    await _flutterTts.speak("You are in the Update Feedback page.");
   }
 
   // Start listening for voice input
@@ -99,111 +106,143 @@ class _UpdateFeedbackScreenState extends State<UpdateFeedbackScreen> {
     return DateFormat('yyyy-MM-dd – kk:mm').format(date);
   }
 
+  // Handle swipe gestures to go back to HomeScreen
+  void _handleSwipe(DragEndDetails details) {
+    if (details.primaryVelocity! > 0) {
+      // Swipe right (go back)
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+      );
+    } else if (details.primaryVelocity! < 0) {
+      // Swipe left (go back)
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Update Feedback')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            // Display feedback list (dynamic)
-            Expanded(
-              child: StreamBuilder(
-                stream: feedbacks
-                    .orderBy('timestamp', descending: true)
-                    .snapshots(),
-                builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-                  if (!snapshot.hasData) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
+    return GestureDetector(
+      // Handle swipe gestures to go back
+      onHorizontalDragEnd: _handleSwipe,
 
-                  return ListView(
-                    children: snapshot.data!.docs.map((document) {
-                      String feedbackText =
-                          document['feedback'] ?? 'No feedback provided';
-                      Timestamp timestamp =
-                          document['timestamp'] ?? Timestamp.now();
-                      String formattedDateTime = _formatTimestamp(timestamp);
-                      String feedbackId = document.id;
+      // Handle long press to start listening for commands
+      onLongPress: _startListening,
 
-                      return Card(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                          side: BorderSide(color: Colors.grey.shade300),
-                        ),
-                        margin: const EdgeInsets.symmetric(vertical: 8),
-                        child: ListTile(
-                          title: Text(feedbackText.length > 20
-                              ? "${feedbackText.substring(0, 20)}..."
-                              : feedbackText),
-                          subtitle: Text(formattedDateTime),
-                          trailing: IconButton(
-                            icon: const Icon(Icons.edit),
-                            color: Colors.blue,
-                            onPressed: () {
-                              // Populate the TextField with the selected feedback text
-                              _updatedFeedbackController.text = feedbackText;
-                              // Show a dialog to edit the feedback
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return AlertDialog(
-                                    title: const Text('Update Feedback'),
-                                    content: TextField(
-                                      controller: _updatedFeedbackController,
-                                      decoration: const InputDecoration(
-                                        hintText: "Edit your feedback",
-                                      ),
-                                      maxLines: 3,
-                                    ),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
-                                        },
-                                        child: const Text('Cancel'),
-                                      ),
-                                      TextButton(
-                                        onPressed: () {
-                                          _updateFeedback(feedbackId);
-                                          Navigator.of(context).pop();
-                                        },
-                                        child: const Text('Update'),
-                                      ),
-                                    ],
-                                  );
-                                },
-                              );
-                            },
+      // Handle double tap to update feedback (for demo purposes)
+      onDoubleTap: () {
+        if (_updatedFeedbackController.text.isNotEmpty) {
+          _flutterTts.speak("Double tap detected. Updating feedback.");
+        }
+      },
+
+      child: Scaffold(
+        appBar: AppBar(title: const Text('Update Feedback')),
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              // Display feedback list (dynamic)
+              Expanded(
+                child: StreamBuilder(
+                  stream: feedbacks
+                      .orderBy('timestamp', descending: true)
+                      .snapshots(),
+                  builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                    if (!snapshot.hasData) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    return ListView(
+                      children: snapshot.data!.docs.map((document) {
+                        String feedbackText =
+                            document['feedback'] ?? 'No feedback provided';
+                        Timestamp timestamp =
+                            document['timestamp'] ?? Timestamp.now();
+                        String formattedDateTime = _formatTimestamp(timestamp);
+                        String feedbackId = document.id;
+
+                        return Card(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
+                            side: BorderSide(color: Colors.grey.shade300),
                           ),
-                        ),
-                      );
-                    }).toList(),
-                  );
-                },
-              ),
-            ),
-            const Divider(),
-            // Microphone button to start/stop listening
-            GestureDetector(
-              onTap: _isListening ? _stopListening : _startListening,
-              child: Container(
-                width: 100,
-                height: 100,
-                decoration: BoxDecoration(
-                  color: _isListening ? Colors.green : Colors.redAccent,
-                  borderRadius: BorderRadius.circular(50),
+                          margin: const EdgeInsets.symmetric(vertical: 8),
+                          child: ListTile(
+                            title: Text(feedbackText.length > 20
+                                ? "${feedbackText.substring(0, 20)}..."
+                                : feedbackText),
+                            subtitle: Text(formattedDateTime),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.edit),
+                              color: Colors.blue,
+                              onPressed: () {
+                                // Populate the TextField with the selected feedback text
+                                _updatedFeedbackController.text = feedbackText;
+                                // Show a dialog to edit the feedback
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      title: const Text('Update Feedback'),
+                                      content: TextField(
+                                        controller: _updatedFeedbackController,
+                                        decoration: const InputDecoration(
+                                          hintText: "Edit your feedback",
+                                        ),
+                                        maxLines: 3,
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                          },
+                                          child: const Text('Cancel'),
+                                        ),
+                                        TextButton(
+                                          onPressed: () {
+                                            _updateFeedback(feedbackId);
+                                            Navigator.of(context).pop();
+                                          },
+                                          child: const Text('Update'),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    );
+                  },
                 ),
-                child: Icon(
-                  _isListening ? Icons.mic : Icons.mic_none,
-                  color: Colors.white,
-                  size: 60,
+              ),
+              const Divider(),
+              // Microphone button to start/stop listening
+              GestureDetector(
+                onTap: _isListening ? _stopListening : _startListening,
+                child: Container(
+                  width: 100,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    color: _isListening ? Colors.green : Colors.redAccent,
+                    borderRadius: BorderRadius.circular(50),
+                  ),
+                  child: Icon(
+                    _isListening ? Icons.mic : Icons.mic_none,
+                    color: Colors.white,
+                    size: 60,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 20),
-          ],
+              const SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
     );
