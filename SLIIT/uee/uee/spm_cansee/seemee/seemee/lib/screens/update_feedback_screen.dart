@@ -109,12 +109,15 @@ class _UpdateFeedbackScreenState extends State<UpdateFeedbackScreen> {
   // Handle swipe gestures to go back to HomeScreen
   void _handleSwipe(DragEndDetails details) {
     if (details.primaryVelocity! > 0) {
+      //say back to home screen
+      _flutterTts.speak("Back to HomeScreen");
       // Swipe right (go back)
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const HomeScreen()),
       );
     } else if (details.primaryVelocity! < 0) {
+      _flutterTts.speak("Back to HomeScreen");
       // Swipe left (go back)
       Navigator.pushReplacement(
         context,
