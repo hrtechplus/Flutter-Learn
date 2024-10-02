@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:vibration/vibration.dart'; // For vibration feedback
+import 'package:flutter/services.dart'; // For haptic feedback
 import 'create_feedback_screen.dart';
 import 'read_feedback_screen.dart';
 import 'update_feedback_screen.dart';
@@ -14,7 +16,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late stt.SpeechToText _speechToText;
-  bool _isListening = false;
+  bool _isListening = false; // Tracks if the app is in listening mode
   String _commandText = "";
 
   @override
@@ -23,7 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _speechToText = stt.SpeechToText(); // Initialize speech recognition
   }
 
-  // Start listening for voice commands
+  // Start listening for voice commands with vibration and haptic feedback
   void _startListening() async {
     if (!_isListening) {
       bool available = await _speechToText.initialize();
@@ -31,11 +33,14 @@ class _HomeScreenState extends State<HomeScreen> {
         setState(() {
           _isListening = true;
         });
+
+        // Trigger vibration and haptic feedback
+        _triggerVibrationAndHaptic();
+
         _speechToText.listen(onResult: (result) {
           setState(() {
             _commandText = result.recognizedWords;
           });
-          _executeCommand(_commandText);
         });
       } else {
         // Handle the case where speech recognition is not available
@@ -44,13 +49,21 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  // Stop listening for voice commands
+  // Stop listening, process the command, and provide feedback
   void _stopListening() async {
     if (_isListening) {
       await _speechToText.stop();
       setState(() {
         _isListening = false;
       });
+
+      // Check if a valid command was captured
+      if (_commandText.isNotEmpty) {
+        _executeCommand(_commandText);
+      } else {
+        // Trigger a long vibration if no command was captured
+        _triggerFailureVibration();
+      }
     }
   }
 
@@ -60,15 +73,34 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (command.contains("create feedback")) {
       _navigateToScreen(CreateFeedbackScreen());
-    } else if (command.contains("read feedbacks")) {
+    } else if (command.contains("read feedback")) {
       _navigateToScreen(ReadFeedbackScreen());
-    } else if (command.contains("edit feedbacks")) {
+    } else if (command.contains("edit feedback")) {
       _navigateToScreen(const UpdateFeedbackScreen());
-    } else if (command.contains("delete feedbacks")) {
+    } else if (command.contains("delete feedback")) {
       _navigateToScreen(DeleteFeedbackScreen());
     } else {
-      // Command not recognized, show message or take alternative action
+      // Command not recognized, provide feedback
       print("Command not recognized");
+      _triggerFailureVibration();
+    }
+  }
+
+  // Trigger vibration and haptic feedback
+  void _triggerVibrationAndHaptic() async {
+    // Provide haptic feedback
+    HapticFeedback.mediumImpact();
+
+    // Provide vibration feedback (if available)
+    if (await Vibration.hasVibrator() ?? false) {
+      Vibration.vibrate(duration: 200); // Vibrate for 200ms
+    }
+  }
+
+  // Trigger long vibration for failure in command capture
+  void _triggerFailureVibration() async {
+    if (await Vibration.hasVibrator() ?? false) {
+      Vibration.vibrate(duration: 1000); // Long vibration for 1000ms
     }
   }
 
@@ -85,8 +117,16 @@ class _HomeScreenState extends State<HomeScreen> {
     double screenHeight = MediaQuery.of(context).size.height;
 
     return GestureDetector(
-      onLongPress:
-          _startListening, // Start listening when long-pressing anywhere on the screen
+      // When user starts long press, start listening
+      onLongPressStart: (details) {
+        _startListening();
+      },
+
+      // When user releases the long press, stop listening and process the result
+      onLongPressEnd: (details) {
+        _stopListening();
+      },
+
       child: Scaffold(
         body: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -119,16 +159,15 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 20),
 
-            // Microphone icon to start and stop listening
+            // Microphone icon to show current listening status
             GestureDetector(
-              onTap: _stopListening, // Stop listening on tap
               child: Container(
                 width: 120,
                 height: 120,
                 decoration: BoxDecoration(
                   color: _isListening
-                      ? Colors.blueAccent
-                      : Colors.blueAccent, // Change color to blueAccent
+                      ? Colors.redAccent // Mic icon turns red while listening
+                      : Colors.blueAccent, // Default is blueAccent
                   borderRadius: BorderRadius.circular(60), // Circular button
                 ),
                 child: Icon(
@@ -158,7 +197,7 @@ class _HomeScreenState extends State<HomeScreen> {
       },
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.blueAccent, // Change color to blueAccent
+          color: Colors.blueAccent, // Changed color to BlueAccent
           borderRadius: BorderRadius.circular(15), // More rounded corners
         ),
         child: Column(

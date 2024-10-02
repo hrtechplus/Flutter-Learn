@@ -208,6 +208,7 @@ class _CreateFeedbackScreenState extends State<CreateFeedbackScreen> {
       // Swipe Left
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (context) => const HomeScreen()));
+      await flutterTts.speak("Back to HomeScreen");
     }
   }
 
@@ -272,7 +273,7 @@ class _CreateFeedbackScreenState extends State<CreateFeedbackScreen> {
                             Icon(
                               Icons.mic,
                               size: 60, // Larger icon for accessibility
-                              color: Colors.redAccent,
+                              color: Colors.blueAccent,
                             ),
                             SizedBox(height: 10),
                             Text(
@@ -302,7 +303,7 @@ class _CreateFeedbackScreenState extends State<CreateFeedbackScreen> {
                             Icon(
                               Icons.send,
                               size: 60, // Larger icon for accessibility
-                              color: Colors.redAccent,
+                              color: Colors.blueAccent,
                             ),
                             SizedBox(height: 10),
                             Text(
