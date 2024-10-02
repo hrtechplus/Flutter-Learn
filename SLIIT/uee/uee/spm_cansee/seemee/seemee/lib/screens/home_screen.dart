@@ -84,45 +84,71 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
 
-    return Scaffold(
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // Grid of buttons with fixed height and spacing
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 30.0),
-            child: GridView.count(
-              shrinkWrap: true,
-              crossAxisCount: 2,
-              crossAxisSpacing: 20,
-              mainAxisSpacing: 20,
-              children: [
-                _buildNavigationButton(
-                    context, Icons.add, "Add", CreateFeedbackScreen()),
-                _buildNavigationButton(
-                    context, Icons.edit, "Edit", const UpdateFeedbackScreen()),
-                _buildNavigationButton(
-                    context, Icons.delete, "Delete", DeleteFeedbackScreen()),
-                _buildNavigationButton(
-                    context, Icons.list, "Show", ReadFeedbackScreen()),
-              ],
+    return GestureDetector(
+      onLongPress:
+          _startListening, // Start listening when long-pressing anywhere on the screen
+      child: Scaffold(
+        body: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Grid of buttons with fixed height and spacing
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 30.0),
+              child: GridView.count(
+                shrinkWrap: true,
+                crossAxisCount: 2,
+                crossAxisSpacing: 20,
+                mainAxisSpacing: 20,
+                children: [
+                  _buildNavigationButton(
+                      context, Icons.add, "Add", CreateFeedbackScreen()),
+                  _buildNavigationButton(context, Icons.edit, "Edit",
+                      const UpdateFeedbackScreen()),
+                  _buildNavigationButton(
+                      context, Icons.delete, "Delete", DeleteFeedbackScreen()),
+                  _buildNavigationButton(
+                      context, Icons.list, "Show", ReadFeedbackScreen()),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(height: 30), // Space between grid and microphone
-          const Divider(
-            thickness: 2.0,
-            indent: 50,
-            endIndent: 50,
-          ),
-          const SizedBox(height: 20),
-          // Microphone icon at the bottom, centered
-          _buildMicrophoneIcon(),
-          const SizedBox(height: 20), // Padding below the microphone
-        ],
+            const SizedBox(height: 30), // Space between grid and microphone
+            const Divider(
+              thickness: 2.0,
+              indent: 50,
+              endIndent: 50,
+            ),
+            const SizedBox(height: 20),
+
+            // Microphone icon to start and stop listening
+            GestureDetector(
+              onTap: _stopListening, // Stop listening on tap
+              child: Container(
+                width: 120,
+                height: 120,
+                decoration: BoxDecoration(
+                  color: _isListening
+                      ? Colors.blueAccent
+                      : Colors.blueAccent, // Change color to blueAccent
+                  borderRadius: BorderRadius.circular(60), // Circular button
+                ),
+                child: Icon(
+                  _isListening
+                      ? Icons.mic
+                      : Icons.mic_none, // Change icon when listening
+                  color: Colors.white,
+                  size: 60, // Larger icon for emphasis
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 20), // Padding below the microphone
+          ],
+        ),
       ),
     );
   }
 
+  // Build the navigation buttons for each screen
   Widget _buildNavigationButton(
       BuildContext context, IconData icon, String label, Widget screen) {
     return GestureDetector(
@@ -132,7 +158,7 @@ class _HomeScreenState extends State<HomeScreen> {
       },
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.redAccent,
+          color: Colors.blueAccent, // Change color to blueAccent
           borderRadius: BorderRadius.circular(15), // More rounded corners
         ),
         child: Column(
@@ -145,31 +171,6 @@ class _HomeScreenState extends State<HomeScreen> {
               style: const TextStyle(color: Colors.white, fontSize: 18),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMicrophoneIcon() {
-    return GestureDetector(
-      onTap: _isListening
-          ? _stopListening
-          : _startListening, // Start or stop listening
-      child: Container(
-        width: 120,
-        height: 120,
-        decoration: BoxDecoration(
-          color: _isListening
-              ? Colors.green
-              : Colors.redAccent, // Change color when listening
-          borderRadius: BorderRadius.circular(60), // Circular button
-        ),
-        child: Icon(
-          _isListening
-              ? Icons.mic
-              : Icons.mic_none, // Change icon when listening
-          color: Colors.white,
-          size: 60, // Larger icon for emphasis
         ),
       ),
     );
