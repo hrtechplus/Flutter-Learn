@@ -50,13 +50,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
             children: [
               const SizedBox(height: 8),
               // Health Profile Section
-              const Text(
-                "Health Profile",
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    "Health Profile",
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/editProfile');
+                    },
+                    icon: const Icon(Icons.edit),
+                    iconSize: 20,
+                  ),
+                ],
               ),
+
+              const SizedBox(height: 16),
 
               const Divider(
                 thickness: 1,
