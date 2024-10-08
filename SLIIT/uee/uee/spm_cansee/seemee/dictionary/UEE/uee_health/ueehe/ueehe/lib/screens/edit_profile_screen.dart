@@ -5,6 +5,8 @@ import 'dart:io';
 import 'package:intl/intl.dart'; // For formatting date
 
 class EditProfileScreen extends StatefulWidget {
+  const EditProfileScreen({super.key});
+
   @override
   _EditProfileScreenState createState() => _EditProfileScreenState();
 }
@@ -127,11 +129,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       backgroundImage: _profileImage != null
                           ? FileImage(_profileImage!)
                           : null,
+                      backgroundColor: Colors.grey,
                       child: _profileImage == null
                           ? const Icon(Icons.person,
                               size: 40, color: Colors.white)
                           : null,
-                      backgroundColor: Colors.grey,
                     ),
                   ),
                   const SizedBox(width: 20),

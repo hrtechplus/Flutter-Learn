@@ -1,8 +1,6 @@
-import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:mailer/mailer.dart';
-import 'package:mailer/smtp_server.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:vibration/vibration.dart';
 
 class ConfirmationScreen extends StatefulWidget {
@@ -27,7 +25,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
   late Animation<double> _animation;
 
   @override
-  Future<void> initState() async {
+  void initState() {
     super.initState();
 
     // Initialize the animation controller for the pulsing effect
@@ -37,50 +35,19 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
     )..repeat(
         reverse: true); // Repeat the animation in reverse for a pulsing effect
 
-    // Define the Tween for scaling the navigation arrow and circles
+    // Initialize the Tween animation after the controller
     _animation = Tween<double>(begin: 0.8, end: 1.2).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
 
-    // Send email when landing on this screen
-    sendEmail();
-
-    // Vibrate when landing on this screen
-    Vibration.vibrate(
-      pattern: [500, 1000, 500, 1000],
-    );
+    // Call the method to initialize and send SMS
   }
 
+  // Function to send SMS using background_sms package
   @override
   void dispose() {
     _controller.dispose(); // Dispose the animation controller when done
     super.dispose();
-  }
-
-  Future<void> sendEmail() async {
-    final smtpServer = gmail(
-        'your_email@gmail.com', 'your_password'); // Use your Gmail credentials
-
-    // Create the email message
-    final message = Message()
-      ..from = Address('rawart.media@gmail.com', 'MedCare App')
-      ..recipients.add('rawart.media@gmail.com') // Recipient email
-      ..subject = 'SOS Confirmation - User Location ${DateTime.now()}'
-      ..text = 'The user is at the following location:\n\n'
-          'Location: ${widget.location}\n'
-          'Latitude: ${widget.latitude}\n'
-          'Longitude: ${widget.longitude}\n\n'
-          'Support is on the way!';
-
-    try {
-      final sendReport = await send(message, smtpServer);
-      print('Message sent: $sendReport');
-    } on MailerException catch (e) {
-      print('Message not sent. \n$e');
-      for (var p in e.problems) {
-        print('Problem: ${p.code}: ${p.msg}');
-      }
-    }
   }
 
   @override
@@ -94,7 +61,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
               gradient: LinearGradient(
                 colors: [
                   Color.fromARGB(255, 255, 122, 122),
-                  Color.fromARGB(255, 255, 71, 71)
+                  Color.fromARGB(255, 255, 71, 71),
                 ], // Light to darker red
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
@@ -128,7 +95,6 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
                     ],
                   ),
                 ),
-
                 const SizedBox(height: 40),
 
                 // Support message
@@ -142,7 +108,6 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 20),
 
                 // Animated Navigation Arrow inside a ripple effect
@@ -152,7 +117,8 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
                     children: [
                       // Ripple Circle 1
                       AnimatedBuilder(
-                        animation: _controller,
+                        animation:
+                            _animation, // Use the properly initialized _animation
                         builder: (context, child) {
                           return Transform.scale(
                             scale: _animation.value,
@@ -172,7 +138,8 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
                       ),
                       // Ripple Circle 2
                       AnimatedBuilder(
-                        animation: _controller,
+                        animation:
+                            _animation, // Same animation used for all circles
                         builder: (context, child) {
                           return Transform.scale(
                             scale: _animation.value * 0.85,
@@ -192,7 +159,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
                       ),
                       // Ripple Circle 3
                       AnimatedBuilder(
-                        animation: _controller,
+                        animation: _animation,
                         builder: (context, child) {
                           return Transform.scale(
                             scale: _animation.value * 0.7,
@@ -219,7 +186,6 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
                     ],
                   ),
                 ),
-
                 const Spacer(),
 
                 // Bottom section with microphone and message
@@ -266,10 +232,9 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
                           Navigator.pop(
                               context); // Return to the previous screen
                           // make long vibration
-                          HapticFeedback.heavyImpact();
-                          // make short vibration
-
-                          HapticFeedback.vibrate();
+                          // HapticFeedback.heavyImpact();
+                          // // make short vibration
+                          // HapticFeedback.vibrate();
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,

@@ -7,12 +7,12 @@ class CustomErrorDialog extends StatelessWidget {
   final VoidCallback onPressed;
 
   const CustomErrorDialog({
-    Key? key,
+    super.key,
     required this.title,
     required this.description,
     required this.buttonText,
     required this.onPressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

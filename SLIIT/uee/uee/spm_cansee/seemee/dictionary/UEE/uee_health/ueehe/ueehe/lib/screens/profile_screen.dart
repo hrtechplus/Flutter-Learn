@@ -92,7 +92,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Birthday: ' + (_birthdate ?? ''),
+                      'Birthday: ${_birthdate ?? ''}',
                       semanticsLabel: _birthdate ?? '',
                       style: const TextStyle(
                         color: Colors.grey,
@@ -109,8 +109,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   _buildHealthData("Blood T", _bloodType ?? ''),
-                  _buildHealthData("Height", (_height ?? '') + 'cm'),
-                  _buildHealthData("Weight", (_weight ?? '') + 'Kg'),
+                  _buildHealthData("Height", '${_height ?? ''}cm'),
+                  _buildHealthData("Weight", '${_weight ?? ''}Kg'),
                 ],
               ),
               const SizedBox(height: 30),

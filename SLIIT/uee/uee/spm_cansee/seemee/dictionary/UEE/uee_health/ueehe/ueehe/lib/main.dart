@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ueehe/screens/edit_profile_screen.dart';
 import 'package:ueehe/screens/essential_info_form_screen.dart';
-import 'package:ueehe/screens/profile_screen.dart';
 import 'package:ueehe/screens/sos_screen.dart';
 import 'package:ueehe/screens/splash_screen.dart';
 import 'package:ueehe/screens/welcome_screen.dart';

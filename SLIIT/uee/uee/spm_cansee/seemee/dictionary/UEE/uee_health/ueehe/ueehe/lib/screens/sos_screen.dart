@@ -186,106 +186,119 @@ class _SosScreenContentState extends State<SosScreenContent>
   /// a custom alert dialog with a 'Try again' button.
   Future<void> _callEmergencyService() async {
     const emergencyNumber = 'tel:1990';
-    if (await canLaunchUrl(Uri.parse(emergencyNumber))) {
-      await launchUrl(
-          Uri.parse(emergencyNumber)); // Launches the dialer with 1990
-    } else {
-      // Add haptic feedback pulse
-      HapticFeedback.heavyImpact(); // Provides haptic feedback -- heavy
-      HapticFeedback.vibrate(); // Provides haptic feedback -- vibrate
-      // Show custom alert dialog if the call cannot be made
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return Center(
-            child: Container(
-              padding: const EdgeInsets.all(20),
-              margin: const EdgeInsets.symmetric(horizontal: 30),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20), // Rounded corners
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4), // Shadow positioning
-                  ),
-                ],
-              ),
-              child: Material(
-                color: Colors.transparent,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Error icon
-                    Container(
-                      height: 60,
-                      width: 60,
-                      decoration: BoxDecoration(
-                        color: Colors.red[100], // Light pink background
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.close, // Error close icon
-                        size: 30,
-                        color: Colors.redAccent, // Pink accent for the icon
-                      ),
-                    ),
-                    const SizedBox(height: 20),
 
-                    // Title
-                    const Text(
-                      'Failed to call 1990',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w900,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-
-                    // Subtitle / description
-                    const Text(
-                      'Hmm, seems like we have no permission to call 1990.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey,
-                      ),
-                    ),
-                    const SizedBox(height: 30),
-
-                    // Try again button
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(context).pop(); // Close the dialog
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.redAccent, // Button color
-                        shape: RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(30), // Rounded button
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 40,
-                          vertical: 8,
-                        ),
-                      ),
-                      child: const Text(
-                        'Try again',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
+    try {
+      if (await canLaunchUrl(Uri.parse(emergencyNumber))) {
+        await launchUrl(
+            Uri.parse(emergencyNumber)); // Launches the dialer with 1990
+      } else {
+        // Add haptic feedback pulse
+        HapticFeedback.heavyImpact(); // Provides haptic feedback -- heavy
+        HapticFeedback.vibrate(); // Provides haptic feedback -- vibrate
+        // Show custom alert dialog if the call cannot be made
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            assert(context != null);
+            return Center(
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                margin: const EdgeInsets.symmetric(horizontal: 30),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20), // Rounded corners
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4), // Shadow positioning
                     ),
                   ],
                 ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Error icon
+                      Container(
+                        height: 60,
+                        width: 60,
+                        decoration: BoxDecoration(
+                          color: Colors.red[100], // Light pink background
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.close, // Error close icon
+                          size: 30,
+                          color: Colors.redAccent, // Pink accent for the icon
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Title
+                      const Text(
+                        'Failed to call 1990',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+
+                      // Subtitle / description
+                      const Text(
+                        'Hmm, seems like we have no permission to call 1990.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      const SizedBox(height: 30),
+
+                      // Try again button
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop(); // Close the dialog
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.redAccent, // Button color
+                          shape: RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.circular(30), // Rounded button
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 40,
+                            vertical: 8,
+                          ),
+                        ),
+                        child: const Text(
+                          'Try again',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        );
+      }
+    } on Exception catch (e) {
+      // Handle any unexpected errors
+      print("Error: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Error: $e"),
+          backgroundColor: Colors.redAccent,
+        ),
       );
     }
   }
@@ -391,7 +404,7 @@ class _SosScreenContentState extends State<SosScreenContent>
             },
           ),
         ),
-        const SizedBox(height: 100),
+        const SizedBox(height: 70),
         Container(
           margin: const EdgeInsets.symmetric(horizontal: 20),
           padding: const EdgeInsets.all(16),
@@ -417,13 +430,21 @@ class _SosScreenContentState extends State<SosScreenContent>
                         color: Colors.black87,
                       ),
                     ),
-                    Text(
-                      widget.location,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Colors.black54,
-                      ),
-                    ),
+                    widget.location == null
+                        ? const Text(
+                            "Loading location",
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.black54,
+                            ),
+                          )
+                        : Text(
+                            widget.location!, // Check for null before accessing
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Colors.black54,
+                            ),
+                          ),
                   ],
                 ),
               ),
@@ -453,7 +474,7 @@ class _SosScreenContentState extends State<SosScreenContent>
                 const SizedBox(
                     width: 10), // Adjust spacing between icon and text
                 const Text(
-                  "Call 1990 සුව සැරිය",
+                  "Call 1990 සුව සැරිය  ", // Check for null before accessing
                   style: TextStyle(
                     color: Colors.redAccent,
                     fontWeight: FontWeight.bold,

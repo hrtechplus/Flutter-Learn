@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flutter/services.dart'; // Import for Haptic Feedback
-import 'package:audioplayers/audioplayers.dart'; // Import for AudioPlayer
+// Import for AudioPlayer
 import 'confirmation_screen.dart';
 
 class CountdownScreen extends StatefulWidget {
