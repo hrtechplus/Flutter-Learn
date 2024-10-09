@@ -7,6 +7,8 @@ import 'package:ueehe/screens/welcome_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ueehe/screens/EmergencyContactsScreen.dart';
 
+/// The main entrypoint for the application. It initializes the Flutter engine
+/// and runs the [MyApp] widget.
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(MyApp());
