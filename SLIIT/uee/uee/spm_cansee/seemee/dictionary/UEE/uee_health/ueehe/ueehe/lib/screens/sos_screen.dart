@@ -3,8 +3,9 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:ueehe/screens/EmergencyContactsScreen.dart';
 import 'package:url_launcher/url_launcher.dart'; // For phone call functionality
-
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/services.dart'; // Import the services package for HapticFeedback
 import '../widgets/custom_bottom_navigation_bar.dart'; // Import the custom navigation bar
 import 'profile_screen.dart';
@@ -42,7 +43,7 @@ class _SosScreenState extends State<SosScreen>
       location: _currentLocation,
       onEmergencyPressed: _startEmergencyProcedure,
     ));
-    _screens.add(HistoryScreen()); // History Screen (Second Tab)
+    _screens.add(EmergencyContactsScreen()); // History Screen (Second Tab)
     _screens.add(ProfileScreen()); // Profile Screen (Third Tab)
 
     _requestPermissions();
@@ -113,9 +114,25 @@ class _SosScreenState extends State<SosScreen>
       );
     } else {
       // Handle the case where the location is not available
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Unable to fetch location")),
+      // Show success message
+      // ignore: unused_local_variable
+      final snackBar = SnackBar(
+        /// need to set following properties for best effect of awesome_snackbar_content
+        elevation: 0,
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: Colors.transparent,
+
+        content: AwesomeSnackbarContent(
+          title: 'Wait',
+          message: 'Please wait while we are fetching your location.',
+
+          /// change contentType to ContentType.success, ContentType.warning or ContentType.help for variants
+          contentType: ContentType.warning,
+        ),
       );
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(snackBar);
     }
   }
 
@@ -132,9 +149,112 @@ class _SosScreenState extends State<SosScreen>
       body: SafeArea(
         child: _screens[_selectedIndex], // Display the selected screen
       ),
+      drawer: _buildDrawer(), // Add the drawer here
       bottomNavigationBar: CustomBottomNavigationBar(
         selectedIndex: _selectedIndex, // Pass the current index
         onTabSelected: _onTabSelected, // Pass the tab selection callback
+      ),
+    );
+  }
+
+  // Method to build the drawer with interactive menu options
+  Widget _buildDrawer() {
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: <Widget>[
+          DrawerHeader(
+            decoration: BoxDecoration(
+              color: Colors.redAccent,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                FutureBuilder<String?>(
+                  future: SharedPreferences.getInstance().then((prefs) {
+                    return prefs.getString('profile_image');
+                  }),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const CircleAvatar(
+                        radius: 40,
+                        backgroundColor: Colors.grey,
+                      );
+                    } else if (snapshot.hasError || !snapshot.hasData) {
+                      return const CircleAvatar(
+                        radius: 40,
+                        backgroundColor: Colors.grey,
+                      );
+                    } else {
+                      return CircleAvatar(
+                        radius: 40,
+                        backgroundImage: AssetImage(snapshot.data!),
+                      );
+                    }
+                  },
+                ),
+                const SizedBox(height: 10),
+                FutureBuilder<String>(
+                  future: SharedPreferences.getInstance().then((prefs) {
+                    return prefs.getString('name') ?? 'Guest';
+                  }),
+                  builder: (context, snapshot) {
+                    return Text(
+                      snapshot.data ?? 'Guest',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.person, color: Colors.black54),
+            title: const Text('Profile'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ProfileScreen(),
+                ),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.history, color: Colors.black54),
+            title: const Text('History'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const HistoryScreen(),
+                ),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.settings, color: Colors.black54),
+            title: const Text('Settings'),
+            onTap: () {
+              // Navigate to settings screen
+            },
+          ),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.exit_to_app, color: Colors.black54),
+            title: const Text('Logout'),
+            onTap: () async {
+              SharedPreferences prefs = await SharedPreferences.getInstance();
+              await prefs.clear(); // Clear user data on logout
+              Navigator.pop(context); // Close drawer
+              // Navigate to the login screen or any other action
+            },
+          ),
+        ],
       ),
     );
   }
@@ -309,7 +429,6 @@ class _SosScreenContentState extends State<SosScreenContent>
   /// Builds the SOS screen, with a top app bar and a SOS button in the center.
   /// The SOS button has a breathing animation and a long press detector to
   /// activate the emergency service.
-  ///
   /// The location is displayed below the SOS button, and a button to call the
   /// 1990 Suwa Seriya emergency service is at the bottom of the screen.
   Widget build(BuildContext context) {
@@ -323,7 +442,9 @@ class _SosScreenContentState extends State<SosScreenContent>
             children: [
               IconButton(
                 icon: const Icon(Icons.menu, size: 28, color: Colors.black54),
-                onPressed: () {},
+                onPressed: () {
+                  Scaffold.of(context).openDrawer(); // Open the side drawer
+                },
               ),
               FutureBuilder<String>(
                 future: SharedPreferences.getInstance().then((prefs) {
@@ -381,7 +502,7 @@ class _SosScreenContentState extends State<SosScreenContent>
         const Padding(
           padding: EdgeInsets.symmetric(horizontal: 40.0),
           child: Text(
-            "Hold the SOS button for a while, if you are in an urgent situation and needed help. Your live location will be shared.",
+            "Hold the SOS button for a while, if you are in an urgent situation and needed help. Your live location will be shared with your homies.",
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 14,

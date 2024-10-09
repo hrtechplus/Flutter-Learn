@@ -5,6 +5,7 @@ import 'package:ueehe/screens/sos_screen.dart';
 import 'package:ueehe/screens/splash_screen.dart';
 import 'package:ueehe/screens/welcome_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:ueehe/screens/EmergencyContactsScreen.dart';
 
 void main() {
   runApp(MyApp());
@@ -25,6 +26,7 @@ class MyApp extends StatelessWidget {
         '/essentialForm': (context) => EssentialInfoFormScreen(),
         '/sos': (context) => SosScreen(),
         '/editProfile': (context) => EditProfileScreen(),
+        '/emegencyContacts': (context) => EmergencyContactsScreen(),
       },
     );
   }
