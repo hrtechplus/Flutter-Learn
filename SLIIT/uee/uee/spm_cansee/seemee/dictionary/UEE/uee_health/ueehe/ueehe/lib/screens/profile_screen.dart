@@ -93,14 +93,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         color: Colors.grey,
                         width: 1,
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          spreadRadius: 1,
-                          blurRadius: 20,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
                     ),
                     child: IconButton(
                       onPressed: _editProfile,
