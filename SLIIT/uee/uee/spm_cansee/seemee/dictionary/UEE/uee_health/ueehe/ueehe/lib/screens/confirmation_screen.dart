@@ -49,7 +49,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
   Future<void> _vibrate() async {
     if ((await Vibration.hasVibrator()) ?? false) {
       // Long vibration
-      await Vibration.vibrate(pattern: [0, 500, 500, 1000], repeat: -1);
+      await Vibration.vibrate(pattern: [0, 500, 500, 1000], repeat: 1);
     }
   }
 
