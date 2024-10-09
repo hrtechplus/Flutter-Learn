@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:io';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -9,22 +10,24 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  String? _name = "Hasindu Rangika";
-  String? _birthdate = "Tue, May 29 2001 (23 Years)";
-  String? _bloodType = "B+";
-  String? _height = "165cm";
-  String? _weight = "55Kg";
-  String? _address = "Minuwangoda, Sri Lanka";
-  String? _phoneNumber = "071 0840 270";
-  String? _gender = "Male";
-  String? _allergies = "None";
+  String? _name = "Your name";
+  String? _birthdate = "-- No Date given--";
+  String? _bloodType = "--";
+  String? _height = "--";
+  String? _weight = "--";
+  String? _address = "--";
+  String? _phoneNumber = "--";
+  String? _gender = "--";
+  String? _allergies = "--";
+  String? _profileImagePath;
 
   @override
   void initState() {
     super.initState();
-    _loadProfileData(); // Load the saved profile data from SharedPreferences
+    _loadProfileData();
   }
 
+  // Load profile data from SharedPreferences
   Future<void> _loadProfileData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -37,10 +40,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _phoneNumber = prefs.getString('phone') ?? _phoneNumber;
       _gender = prefs.getString('gender') ?? _gender;
       _allergies = prefs.getString('allergies') ?? _allergies;
+      _profileImagePath = prefs.getString('profile_image');
     });
   }
 
+  // Navigate to edit profile screen and refresh when returning
+  Future<void> _editProfile() async {
+    final result = await Navigator.pushNamed(context, '/editProfile');
+    if (result == 'updated') {
+      _loadProfileData(); // Reload the data when the profile is updated
+    }
+  }
+
   @override
+
+  /// Builds the ProfileScreen UI.
+  ///
+  /// Displays the user's health profile data, with options to edit the profile.
+  /// The screen also displays general information about the user, such as their
+  /// address, phone number, and allergies.
+  ///
+  /// The UI is organized into sections for the user's health profile and extra
+  /// information. The health profile section displays the user's name, birthdate,
+  /// blood type, height, and weight. The extra information section displays the
+  /// user's address, phone number, gender, and allergies.
+  ///
+  /// The screen also includes an "Edit Profile" button in the top right corner,
+  /// which navigates to the [EditProfileScreen] when pressed.
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
@@ -60,35 +86,53 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  IconButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/editProfile');
-                    },
-                    icon: const Icon(Icons.edit),
-                    iconSize: 20,
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(30.0),
+                      border: Border.all(
+                        color: Colors.grey,
+                        width: 1,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          spreadRadius: 1,
+                          blurRadius: 20,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: IconButton(
+                      onPressed: _editProfile,
+                      icon: const Icon(Icons.edit),
+                      iconSize: 25,
+                    ),
                   ),
                 ],
               ),
-
               const SizedBox(height: 16),
-
               const Divider(
                 thickness: 1,
                 color: Color.fromARGB(96, 158, 158, 158),
               ),
               const SizedBox(height: 16),
-
               const SizedBox(height: 20),
+
               // Profile Image
               Center(
                 child: CircleAvatar(
                   radius: 50,
                   backgroundColor: Colors.red[300],
-                  child: const Icon(
-                    Icons.person,
-                    size: 50,
-                    color: Colors.white,
-                  ),
+                  backgroundImage: _profileImagePath != null
+                      ? FileImage(File(_profileImagePath!))
+                      : null,
+                  child: _profileImagePath == null
+                      ? const Icon(
+                          Icons.person,
+                          size: 50,
+                          color: Colors.white,
+                        )
+                      : null,
                 ),
               ),
               const SizedBox(height: 20),
@@ -180,22 +224,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
       ),
-
-      // Floating Edit Button
-      floatingActionButton: FloatingActionButton(
-        shape: const CircleBorder(),
-        backgroundColor: Colors.redAccent,
-        foregroundColor: Colors.white,
-        onPressed: () {
-          Navigator.pushNamed(
-              context, '/editProfile'); // Navigate to edit screen
-        },
-        child: const Icon(Icons.edit),
-      ),
     );
   }
 
-  // Helper Widget for Health Profile data (Blood Type, Height, Weight)
+  /// A widget to display a health data item (e.g. blood type, height, weight).
+  ///
+  /// Shows a bolded [title] followed by the [value] below it.
+  ///
+  /// Useful for displaying health data in a consistent format.
   Widget _buildHealthData(String title, String value) {
     return Column(
       children: [
@@ -215,7 +251,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // Helper Widget for Extra Information (Address, Phone, Gender)
+  /// A widget to display extra information about the user.
+  ///
+  /// This widget takes an [icon] and an [info] string, and displays them in a
+  /// row, with the icon to the left of the text. The row is padded by 8px
+  /// vertically.
+  ///
+  /// Useful for displaying extra information such as the user's address, phone
+  /// number, or gender.
   Widget _buildExtraInfo(IconData icon, String info) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),

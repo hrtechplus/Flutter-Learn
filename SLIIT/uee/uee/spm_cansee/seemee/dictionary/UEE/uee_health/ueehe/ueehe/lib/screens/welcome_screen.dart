@@ -17,10 +17,8 @@ class WelcomeScreen extends StatelessWidget {
               const Spacer(),
 
               // App Icon or Illustration (Center)
-              const Icon(
-                Icons.health_and_safety, // Replace with your app's logo
-                size: 150,
-                color: Colors.redAccent,
+              Image.asset(
+                'assets/images/uee_logo.png', // Path to your logo asset
               ),
 
               const SizedBox(height: 30),

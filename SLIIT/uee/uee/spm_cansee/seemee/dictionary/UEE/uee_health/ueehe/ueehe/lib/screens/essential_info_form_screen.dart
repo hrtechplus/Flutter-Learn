@@ -28,6 +28,24 @@ class _EssentialInfoFormScreenState extends State<EssentialInfoFormScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _loadUserInfo(); // Load existing user info if any
+  }
+
+  // Load user info from SharedPreferences
+  Future<void> _loadUserInfo() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _nameController.text = prefs.getString('fullName') ?? '';
+      _ageController.text = prefs.getString('age') ?? '';
+      _selectedBloodGroup = prefs.getString('bloodGroup');
+      _emergencyContactController.text =
+          prefs.getString('emergencyContact') ?? '';
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -135,8 +153,8 @@ class _EssentialInfoFormScreenState extends State<EssentialInfoFormScreen> {
               // Emergency Contact Field
               _buildTextField(
                 controller: _emergencyContactController,
-                label: 'Emergency Contact',
-                hint: 'Enter emergency contact',
+                label: 'Address',
+                hint: 'Enter your address',
               ),
               const SizedBox(height: 30),
 
@@ -221,10 +239,10 @@ class _EssentialInfoFormScreenState extends State<EssentialInfoFormScreen> {
   // Save user info to SharedPreferences
   Future<void> _saveUserInfo() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('fullName', _nameController.text);
-    await prefs.setString('age', _ageController.text);
-    await prefs.setString('bloodGroup', _selectedBloodGroup ?? '');
-    await prefs.setString('emergencyContact', _emergencyContactController.text);
+    await prefs.setString('name', _nameController.text);
+    await prefs.setString('address', _ageController.text);
+    await prefs.setString('blood_group', _selectedBloodGroup ?? '');
+    await prefs.setString('phone', _emergencyContactController.text);
 
     // Show success message
     ScaffoldMessenger.of(context).showSnackBar(

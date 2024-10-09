@@ -54,6 +54,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       _addressController.text = prefs.getString('address') ?? '';
       _selectedBloodGroup =
           prefs.getString('blood_group') ?? _bloodGroups.first;
+      String? profileImagePath = prefs.getString('profile_image');
+      if (profileImagePath != null) {
+        _profileImage = File(profileImagePath); // Load saved image
+      }
     });
   }
 
@@ -83,15 +87,28 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     if (_profileImage != null) {
       await prefs.setString('profile_image', _profileImage!.path);
     }
+    Navigator.pop(context, 'updated'); // Return to ProfileScreen
+  }
+
+  // Delete profile data from SharedPreferences
+  Future<void> _deleteProfile() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.clear(); // Clear all the saved data
+    Navigator.pop(context, 'updated'); // Return to ProfileScreen
   }
 
   // Show the date picker to select the birthday
   Future<void> _selectDate(BuildContext context) async {
+    DateTime initialDate = DateTime.now();
+    if (_birthdayController.text.isNotEmpty) {
+      initialDate = DateFormat('yyyy-MM-dd').parse(_birthdayController.text);
+    }
+
     DateTime? pickedDate = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(), // Initial date shown on the calendar
-      firstDate: DateTime(1900), // Earliest selectable date
-      lastDate: DateTime.now(), // Latest selectable date (today)
+      initialDate: initialDate,
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
     );
     if (pickedDate != null) {
       setState(() {
@@ -111,8 +128,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           child: ListView(
             children: [
               const SizedBox(height: 24),
-              const Text('Health Profile',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+              const Text('Health Profile.',
+                  style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
               const SizedBox(height: 1),
               const Text('To keep you safe we get those',
                   style: TextStyle(color: Colors.black54)),
@@ -209,7 +226,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
                     _saveProfileData(); // Save updated profile data
-                    Navigator.pop(context); // Navigate back to Profile Screen
                   }
                 },
                 style: ElevatedButton.styleFrom(
@@ -220,6 +236,24 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   ),
                 ),
                 child: const Text('Save my profile',
+                    style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white)),
+              ),
+              const SizedBox(height: 16),
+
+              // Delete Profile Button
+              ElevatedButton(
+                onPressed: _deleteProfile, // Clear profile data
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.grey,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text('Delete my profile',
                     style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
