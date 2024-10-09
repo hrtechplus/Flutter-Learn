@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart'; // For phone call functionality
 
 import 'package:flutter/services.dart'; // Import the services package for HapticFeedback
@@ -324,13 +325,40 @@ class _SosScreenContentState extends State<SosScreenContent>
                 icon: const Icon(Icons.menu, size: 28, color: Colors.black54),
                 onPressed: () {},
               ),
-              const Text(
-                "Hello, Hasindu",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.black87,
-                ),
+              FutureBuilder<String>(
+                future: SharedPreferences.getInstance().then((prefs) {
+                  return 'Hello, ${prefs.getString('name') ?? 'there'}';
+                }),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Text(
+                      'Loading...',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black87,
+                      ),
+                    );
+                  } else if (snapshot.hasError) {
+                    return const Text(
+                      'Error',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black87,
+                      ),
+                    );
+                  } else {
+                    return Text(
+                      snapshot.data ?? '',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black87,
+                      ),
+                    );
+                  }
+                },
               ),
               IconButton(
                 icon: const Icon(Icons.notifications_none,

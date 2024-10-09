@@ -171,7 +171,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               Row(
                 children: [
                   Expanded(
-                      child: _buildTextField(_phoneController, 'Phone Number')),
+                      child: _buildTextField(_phoneController, 'Phone Number',
+                          keyboardType: TextInputType.number)),
                   const SizedBox(width: 16),
                   Expanded(
                     child: DropdownButtonFormField<String>(
@@ -267,11 +268,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   // Helper method to build text fields
-  TextFormField _buildTextField(
-      TextEditingController controller, String label) {
+  TextFormField _buildTextField(TextEditingController controller, String label,
+      {TextInputType keyboardType = TextInputType.text}) {
     return TextFormField(
       controller: controller,
       decoration: _buildInputDecoration(label),
+      keyboardType: keyboardType,
       validator: (value) {
         if (value == null || value.isEmpty) {
           return 'Please enter $label';

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 
 class EssentialInfoFormScreen extends StatefulWidget {
   const EssentialInfoFormScreen({super.key});
@@ -245,9 +246,25 @@ class _EssentialInfoFormScreenState extends State<EssentialInfoFormScreen> {
     await prefs.setString('phone', _emergencyContactController.text);
 
     // Show success message
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Profile created successfully!')),
+    final snackBar = SnackBar(
+      /// need to set following properties for best effect of awesome_snackbar_content
+      elevation: 0,
+      behavior: SnackBarBehavior.floating,
+      backgroundColor: Colors.transparent,
+
+      content: AwesomeSnackbarContent(
+        title: 'Welcome!',
+        message:
+            'Your information has been saved successfully. You can now continue to the SOS page.',
+
+        /// change contentType to ContentType.success, ContentType.warning or ContentType.help for variants
+        contentType: ContentType.success,
+      ),
     );
+
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(snackBar);
 
     // Navigate to SOS Screen
     Navigator.pushReplacementNamed(context, '/sos');
