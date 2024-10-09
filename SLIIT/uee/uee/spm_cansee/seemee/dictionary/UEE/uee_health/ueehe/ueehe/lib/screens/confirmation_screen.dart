@@ -1,3 +1,4 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -50,6 +51,8 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
     if ((await Vibration.hasVibrator()) ?? false) {
       // Long vibration
       await Vibration.vibrate(pattern: [0, 500, 500, 1000], repeat: 1);
+      // Play a sound when the vibration happens
+      await AudioPlayer().play(AssetSource('assets/sounds/alert.mp3'));
     }
   }
 
@@ -270,6 +273,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
                           // HapticFeedback.heavyImpact();
                           // // make short vibration
                           // HapticFeedback.vibrate();
+                          Vibration.cancel();
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
