@@ -269,10 +269,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
                         onPressed: () {
                           Navigator.pop(
                               context); // Return to the previous screen
-                          // make long vibration
-                          // HapticFeedback.heavyImpact();
-                          // // make short vibration
-                          // HapticFeedback.vibrate();
+                          // stop the vibration
                           Vibration.cancel();
                         },
                         style: ElevatedButton.styleFrom(
