@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vibration/vibration.dart';
 
 class ConfirmationScreen extends StatefulWidget {
@@ -79,18 +80,43 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      IconButton(
-                        icon: const Icon(Icons.menu,
-                            size: 28, color: Colors.black54),
-                        onPressed: () {},
-                      ),
-                      const Text(
-                        "Hello, Hasindu",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.black87,
-                        ),
+                      FutureBuilder<String>(
+                        future: SharedPreferences.getInstance().then((prefs) {
+                          return prefs.getString('name') ?? 'User';
+                        }),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Text(
+                              'Loading...',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.black87,
+                              ),
+                            );
+                          } else if (snapshot.hasError) {
+                            return const Text(
+                              'Error',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.black87,
+                              ),
+                            );
+                          } else {
+                            return Center(
+                              child: Text(
+                                'Don\'t panic, ${snapshot.data ?? 'there'}',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                            );
+                          }
+                        },
                       ),
                     ],
                   ),

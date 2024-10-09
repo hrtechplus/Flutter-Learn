@@ -8,6 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:ueehe/screens/EmergencyContactsScreen.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(MyApp());
 }
 
@@ -18,7 +19,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Emergency App',
-      theme: ThemeData(textTheme: GoogleFonts.poppinsTextTheme()),
+      theme: ThemeData(textTheme: GoogleFonts.interTextTheme()),
       initialRoute: '/',
       routes: {
         '/': (context) => SplashScreen(),

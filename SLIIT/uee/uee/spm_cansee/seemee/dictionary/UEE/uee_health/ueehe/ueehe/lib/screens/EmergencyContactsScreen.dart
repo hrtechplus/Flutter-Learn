@@ -1,8 +1,5 @@
-import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/material.dart';
-import 'package:contacts_service/contacts_service.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // For storing contacts locally
+import 'package:shared_preferences/shared_preferences.dart';
 
 class EmergencyContactsScreen extends StatefulWidget {
   const EmergencyContactsScreen({super.key});
@@ -13,29 +10,22 @@ class EmergencyContactsScreen extends StatefulWidget {
 }
 
 class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
-  List<Contact> _contacts = []; // List of contacts selected from the phone
-  List<Map<String, String>> _emergencyContacts =
-      []; // Stored contacts with nicknames
+  List<Map<String, String>> _emergencyContacts = []; // List to store contacts
 
   @override
   void initState() {
     super.initState();
-    _loadEmergencyContacts(); // Load saved emergency contacts on startup
+    _loadEmergencyContacts(); // Load contacts on startup
   }
 
   // Load emergency contacts from SharedPreferences
   Future<void> _loadEmergencyContacts() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String> savedContacts = prefs.getStringList('emergencyContacts') ?? [];
-
     setState(() {
       _emergencyContacts = savedContacts
-          .map((contactJson) async {
-            Map<String, String> contact = Map<String, String>.from(
-                Map<String, dynamic>.from(await _decodeJson(contactJson)));
-            return contact;
-          })
-          .cast<Map<String, String>>()
+          .map((contactJson) => Map<String, String>.from(
+              Map<String, dynamic>.from(_decodeJson(contactJson))))
           .toList();
     });
   }
@@ -43,138 +33,93 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
   // Save emergency contacts to SharedPreferences
   Future<void> _saveEmergencyContacts() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String> contactJsonList = _emergencyContacts
-        .map((contact) async => await _encodeJson(contact))
-        .cast<String>()
-        .toList();
+    List<String> contactJsonList =
+        _emergencyContacts.map((contact) => _encodeJson(contact)).toList();
     await prefs.setStringList('emergencyContacts', contactJsonList);
   }
 
-  Future<void> _requestContactsPermission() async {
-    PermissionStatus permission = await Permission.contacts.request();
-    if (permission.isGranted) {
-      _selectContactFromPhoneBook();
-    } else {
-      // Handle permission denied scenario
-      // Show success message
-      final snackBar = SnackBar(
-        /// need to set following properties for best effect of awesome_snackbar_content
-        elevation: 0,
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: Colors.transparent,
+  // Add or edit contact
+  Future<void> _addOrEditContact(
+      {Map<String, String>? contact, int? index}) async {
+    TextEditingController nameController = TextEditingController();
+    TextEditingController phoneController = TextEditingController();
+    TextEditingController nicknameController = TextEditingController();
 
-        content: AwesomeSnackbarContent(
-          title: 'Permission denied',
-          message: 'Please allow permission to add emergency contacts.',
-
-          /// change contentType to ContentType.success, ContentType.warning or ContentType.help for variants
-          contentType: ContentType.failure,
-        ),
-      );
-
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(snackBar);
+    if (contact != null) {
+      nameController.text = contact['name']!;
+      phoneController.text = contact['phone']!;
+      nicknameController.text = contact['nickname']!;
     }
-  }
-
-  // Select a contact from the phone book
-  Future<void> _selectContactFromPhoneBook() async {
-    try {
-      Contact? contact = await ContactsService.openDeviceContactPicker();
-      if (contact != null) {
-        _addContactToEmergencyList(contact);
-      }
-    } catch (e) {
-      // Handle error
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text("Error selecting contact: $e")));
-    }
-  }
-
-  // Add contact to emergency list and manage nickname
-  Future<void> _addContactToEmergencyList(Contact contact) async {
-    TextEditingController _nicknameController = TextEditingController();
 
     await showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Add Contact Nickname"),
-        content: TextField(
-          controller: _nicknameController,
-          decoration: const InputDecoration(
-            labelText: "Nickname",
+      builder: (context) {
+        return AlertDialog(
+          title: Text(contact == null ? 'Add Contact' : 'Edit Contact'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(labelText: 'Full Name'),
+              ),
+              TextField(
+                controller: phoneController,
+                decoration: const InputDecoration(labelText: 'Phone Number'),
+                keyboardType: TextInputType.phone,
+              ),
+              TextField(
+                controller: nicknameController,
+                decoration: const InputDecoration(labelText: 'Nickname'),
+              ),
+            ],
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context); // Close the dialog without saving
-            },
-            child: const Text("Cancel"),
-          ),
-          TextButton(
-            onPressed: () {
-              setState(() {
-                _emergencyContacts.add({
-                  'name': contact.displayName ?? "Unnamed",
-                  'phone': contact.phones!.first.value ?? "No Number",
-                  'nickname': _nicknameController.text.isNotEmpty
-                      ? _nicknameController.text
-                      : contact.displayName ?? "Unnamed",
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Close the dialog without saving
+              },
+              child: const Text("Cancel"),
+            ),
+            TextButton(
+              onPressed: () {
+                if (nameController.text.isEmpty ||
+                    phoneController.text.isEmpty ||
+                    nicknameController.text.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("All fields are required!")),
+                  );
+                  return;
+                }
+
+                setState(() {
+                  if (contact == null) {
+                    _emergencyContacts.add({
+                      'name': nameController.text,
+                      'phone': phoneController.text,
+                      'nickname': nicknameController.text,
+                    });
+                  } else {
+                    _emergencyContacts[index!] = {
+                      'name': nameController.text,
+                      'phone': phoneController.text,
+                      'nickname': nicknameController.text,
+                    };
+                  }
+                  _saveEmergencyContacts(); // Save the updated list
                 });
-                _saveEmergencyContacts(); // Save the updated list
-              });
-              Navigator.pop(context); // Close the dialog after saving
-            },
-            child: const Text("Save"),
-          ),
-        ],
-      ),
+
+                Navigator.pop(context); // Close the dialog after saving
+              },
+              child: const Text("Save"),
+            ),
+          ],
+        );
+      },
     );
   }
 
-  // Edit the nickname of a selected emergency contact
-  Future<void> _editContactNickname(int index) async {
-    TextEditingController _nicknameController = TextEditingController();
-    _nicknameController.text = _emergencyContacts[index]['nickname']!;
-
-    await showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Edit Nickname"),
-        content: TextField(
-          controller: _nicknameController,
-          decoration: const InputDecoration(
-            labelText: "Nickname",
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context); // Close the dialog without saving
-            },
-            child: const Text("Cancel"),
-          ),
-          TextButton(
-            onPressed: () {
-              setState(() {
-                _emergencyContacts[index]['nickname'] =
-                    _nicknameController.text.isNotEmpty
-                        ? _nicknameController.text
-                        : _emergencyContacts[index]['name']!;
-                _saveEmergencyContacts(); // Save the updated list
-              });
-              Navigator.pop(context); // Close the dialog after saving
-            },
-            child: const Text("Save"),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Delete a contact from the emergency list
+  // Delete a contact from the list
   Future<void> _deleteContact(int index) async {
     setState(() {
       _emergencyContacts.removeAt(index);
@@ -186,11 +131,13 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Emergency Contacts"),
+        title: const Text("MediCare SOS"),
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
-            onPressed: _requestContactsPermission, // Select a new contact
+            onPressed: () {
+              _addOrEditContact(); // Open dialog to add a new contact
+            },
           ),
         ],
       ),
@@ -208,7 +155,10 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
                   trailing: PopupMenuButton<String>(
                     onSelected: (value) {
                       if (value == 'edit') {
-                        _editContactNickname(index);
+                        _addOrEditContact(
+                          contact: _emergencyContacts[index],
+                          index: index,
+                        );
                       } else if (value == 'delete') {
                         _deleteContact(index);
                       }
@@ -216,11 +166,11 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
                     itemBuilder: (context) => [
                       const PopupMenuItem(
                         value: 'edit',
-                        child: Text('Edit Nickname'),
+                        child: Text('Edit'),
                       ),
                       const PopupMenuItem(
                         value: 'delete',
-                        child: Text('Delete Contact'),
+                        child: Text('Delete'),
                       ),
                     ],
                   ),
@@ -237,16 +187,18 @@ class _EmergencyContactsScreenState extends State<EmergencyContactsScreen> {
     );
   }
 
-  // JSON encoding/decoding helpers
-  Future<String> _encodeJson(Map<String, String> contact) async {
+  // Encode contact as JSON string
+  String _encodeJson(Map<String, String> contact) {
     return contact.toString();
   }
 
-  Future<Map<String, dynamic>> _decodeJson(String contactJson) async {
+  // Decode JSON string to Map
+  Map<String, dynamic> _decodeJson(String contactJson) {
+    List<String> parts = contactJson.split(', ');
     return {
-      'name': contactJson.split(',')[0],
-      'phone': contactJson.split(',')[1],
-      'nickname': contactJson.split(',')[2]
+      'name': parts[0].split(': ')[1],
+      'phone': parts[1].split(': ')[1],
+      'nickname': parts[2].split(': ')[1],
     };
   }
 }

@@ -83,7 +83,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     "Health Profile",
                     style: TextStyle(
                       fontSize: 32,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w900,
                     ),
                   ),
                   Container(
