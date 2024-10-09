@@ -52,7 +52,6 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
       // Long vibration
       await Vibration.vibrate(pattern: [0, 500, 500, 1000], repeat: 1);
       // Play a sound when the vibration happens
-      await AudioPlayer().play(AssetSource('assets/sounds/alert.mp3'));
     }
   }
 
