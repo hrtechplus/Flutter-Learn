@@ -41,10 +41,18 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
 
-    // Call the method to initialize and send SMS
+    // Call the vibration function
+    _vibrate();
   }
 
-  // Function to send SMS using background_sms package
+  // Function to vibrate the haptic feedback and long vibration
+  Future<void> _vibrate() async {
+    if ((await Vibration.hasVibrator()) ?? false) {
+      // Long vibration
+      await Vibration.vibrate(pattern: [0, 500, 500, 1000], repeat: -1);
+    }
+  }
+
   @override
   void dispose() {
     _controller.dispose(); // Dispose the animation controller when done
@@ -76,7 +84,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
                 // Top App Bar section
                 Padding(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 16.0, vertical: 16.0),
+                      horizontal: 72.0, vertical: 16.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -107,11 +115,12 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
                           } else {
                             return Center(
                               child: Text(
-                                'Don\'t panic, ${snapshot.data ?? 'there'}',
+                                'Don\'t panic!, ${snapshot.data ?? 'there'}',
+                                textAlign: TextAlign.center,
                                 style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w500,
-                                  color: Colors.black87,
+                                  color: Colors.white60,
                                 ),
                               ),
                             );
