@@ -27,7 +27,7 @@ class SplashScreen extends StatelessWidget {
 
             // App Name
             const Text(
-              'MedCare',
+              'MediCare',
               style: TextStyle(
                 fontSize: 48,
                 fontWeight: FontWeight.bold,
