@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:vibration/vibration.dart';
 
 class ConfirmationScreen extends StatefulWidget {
@@ -46,6 +47,29 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
     _vibrate();
   }
 
+  //Function to send the sms
+  Future<void> _sendSms() async {
+    if (await Permission.sms.request().isGranted) {
+      // send the sms with location with that saying im intouble
+      //send email with location with that saying im intouble
+      // Send email with location with that saying im in trouble
+      final String email =
+          'mailto:rawart.media@gmail.com?subject=I%20am%20in%20trouble&body=I%20am%20in%20trouble.%20My%20location%20is%20${widget.location}';
+      final Uri emailUri = Uri.parse(email);
+      await canLaunchUrl(emailUri)
+          ? launchUrl(emailUri)
+          : print('Could not launch email');
+      final String message =
+          'I am in trouble. My location is ${widget.location}';
+      final String recipients = '+94710840270'; //
+      final String sms = 'sms:$recipients?body=$message';
+      final Uri smsUri = Uri.parse(sms);
+      await canLaunchUrl(smsUri)
+          ? launchUrl(smsUri)
+          : print('Could not launch SMS');
+    }
+  }
+
   // Function to vibrate the haptic feedback and long vibration
   Future<void> _vibrate() async {
     if ((await Vibration.hasVibrator()) ?? false) {
@@ -85,10 +109,9 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
               children: [
                 // Top App Bar section
                 Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 72.0, vertical: 16.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       FutureBuilder<String>(
                         future: SharedPreferences.getInstance().then((prefs) {
@@ -115,15 +138,13 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
                               ),
                             );
                           } else {
-                            return Center(
-                              child: Text(
-                                'Don\'t panic!, ${snapshot.data ?? 'there'}',
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.white60,
-                                ),
+                            return Text(
+                              'Don\'t panic.!, ${snapshot.data ?? 'there'}',
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white60,
                               ),
                             );
                           }
