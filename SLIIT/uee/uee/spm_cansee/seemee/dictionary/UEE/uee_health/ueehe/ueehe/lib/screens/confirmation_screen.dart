@@ -1,10 +1,12 @@
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:vibration/vibration.dart';
+import 'package:telephony_sms/telephony_sms.dart';
 
 class ConfirmationScreen extends StatefulWidget {
   final String location;
@@ -26,7 +28,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
-
+  final _telephonySMS = TelephonySMS();
   @override
   void initState() {
     super.initState();
@@ -47,28 +49,20 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
     _vibrate();
   }
 
-  //Function to send the sms
-  Future<void> _sendSms() async {
-    if (await Permission.sms.request().isGranted) {
-      // send the sms with location with that saying im intouble
-      //send email with location with that saying im intouble
-      // Send email with location with that saying im in trouble
-      final String email =
-          'mailto:rawart.media@gmail.com?subject=I%20am%20in%20trouble&body=I%20am%20in%20trouble.%20My%20location%20is%20${widget.location}';
-      final Uri emailUri = Uri.parse(email);
-      await canLaunchUrl(emailUri)
-          ? launchUrl(emailUri)
-          : print('Could not launch email');
-      final String message =
-          'I am in trouble. My location is ${widget.location}';
-      final String recipients = '+94710840270'; //
-      final String sms = 'sms:$recipients?body=$message';
-      final Uri smsUri = Uri.parse(sms);
-      await canLaunchUrl(smsUri)
-          ? launchUrl(smsUri)
-          : print('Could not launch SMS');
-    }
-  }
+  // //Function to send the sms
+  // Future<void> _sendSms() async {
+  //   // Request SEND_SMS permission first
+
+  //   if (  ) {
+  //     // Permission granted, now send the SMS
+  //     final String phoneNumber = "+94710840270"; // Your phone number here
+  //     final String message = "I am in trouble. Please help!";
+
+  //     await _telephonySMS.sendSMS(phone: phoneNumber, message: message);
+  //   } else {
+  //     print('SMS permission not granted');
+  //   }
+  // }
 
   // Function to vibrate the haptic feedback and long vibration
   Future<void> _vibrate() async {
@@ -267,10 +261,26 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
                   ),
                   child: Column(
                     children: [
-                      const Icon(
-                        Icons.mic,
-                        color: Colors.white,
-                        size: 40,
+                      GestureDetector(
+                        onTap: () async {
+// Request SMS permission first
+                          if (await Permission.sms.request().isGranted) {
+                            // Send the SMS
+                            await _telephonySMS.sendSMS(
+                              phone: "+94710840270", // Your target phone number
+                              message:
+                                  "I am in trouble. Please help!", // Your message
+                            );
+                            print("SMS Sent!");
+                          } else {
+                            print("SMS Permission Denied");
+                          }
+                        },
+                        child: const Icon(
+                          Icons.mic,
+                          color: Colors.white,
+                          size: 40,
+                        ),
                       ),
                       const SizedBox(height: 10),
                       const Padding(
@@ -286,10 +296,11 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
                       ),
                       const SizedBox(height: 20),
                       ElevatedButton(
-                        onPressed: () {
+                        onPressed: () async {
                           Navigator.pop(
                               context); // Return to the previous screen
                           // stop the vibration
+
                           Vibration.cancel();
                         },
                         style: ElevatedButton.styleFrom(
