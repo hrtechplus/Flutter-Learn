@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:geolocator/geolocator.dart';
@@ -172,7 +174,18 @@ class _SosScreenState extends State<SosScreen>
               children: [
                 FutureBuilder<String?>(
                   future: SharedPreferences.getInstance().then((prefs) {
-                    return prefs.getString('profile_image');
+                    final profileImagePath = prefs.getString('profile_image');
+                    if (profileImagePath != null) {
+                      return File(profileImagePath).exists().then((exists) {
+                        if (exists) {
+                          return profileImagePath;
+                        } else {
+                          return null;
+                        }
+                      });
+                    } else {
+                      return null;
+                    }
                   }),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
